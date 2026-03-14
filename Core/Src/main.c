@@ -129,7 +129,7 @@ int main(void)
   uint32_t stop = 0;
   float temp = 0;
   uint32_t adcValue = 0;
-  float airVelocity = 340.f; // m / s
+  float airSoundVelocity = 340.f; // m / s
   static const unsigned us_in_s = 1000000;
   static const uint16_t ADC_MAX_VALUE = 4096;
   static const float ADC_MAX_VOLTAGE = 3.3f;
@@ -139,12 +139,12 @@ int main(void)
   {
 	  adcValue = HAL_ADC_GetValue(&hadc1);
 	  temp = adcValue * V_TO_C_CONVERSION * ADC_MAX_VOLTAGE / ADC_MAX_VALUE;
-	  airVelocity = 331.8f + 0.6f * temp;
+	  airSoundVelocity = 331.8f + 0.6f * temp;
 
 	  start = HAL_TIM_ReadCapturedValue(&htim2, TIM_CHANNEL_1);
 	  stop = HAL_TIM_ReadCapturedValue(&htim2, TIM_CHANNEL_2);
-	  printf("Distance: %.1f [cm]\n", (stop - start) * (airVelocity / (2 * us_in_s)) * 100);
-	  printf("Temp: %.1f [C], ADC: %lu[-]\n", temp, adcValue);
+	  printf("Distance: %.1f [cm]\n", (stop - start) * (airSoundVelocity / (2 * us_in_s)) * 100);
+	  printf("ADC: %lu[-], Temp: %.1f [C], AirSoundVelocity: %.1f [m/s]\n", adcValue, temp, airSoundVelocity);
 	  HAL_Delay(500);
 
 	  //forbot - 1/3 of the lesson 14
