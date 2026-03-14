@@ -113,14 +113,21 @@ int main(void)
   /* USER CODE BEGIN WHILE */
 
   HAL_TIM_IC_Start(&htim2, TIM_CHANNEL_1);
-  HAL_TIM_IC_Start(&htim2, TIM_CHANNEL_3);
+  HAL_TIM_IC_Start(&htim2, TIM_CHANNEL_2);
+  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_3);
 
   HAL_Delay(1000);
 
+  uint32_t start = 0;
+  uint32_t stop = 0;
+  static const float airVelocity = 34000.f; // cm / s
+  static const unsigned us_in_s = 1000000;
+
   while (1)
   {
-	  uint32_t value = HAL_TIM_ReadCapturedValue(&htim2, TIM_CHANNEL_1);
-	  printf("%.1f cm\n", (value - 2230) / 58.0f);
+	  start = HAL_TIM_ReadCapturedValue(&htim2, TIM_CHANNEL_1);
+	  stop = HAL_TIM_ReadCapturedValue(&htim2, TIM_CHANNEL_2);
+	  printf("%.1f cm\n", (stop - start) * (airVelocity / (2 * us_in_s)));
 	  HAL_Delay(500);
 
 	  //forbot - 1/3 of the lesson 14
@@ -230,11 +237,17 @@ static void MX_TIM2_Init(void)
   {
     Error_Handler();
   }
-  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_FALLING;
+  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_RISING;
   sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;
   sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
   sConfigIC.ICFilter = 0;
   if (HAL_TIM_IC_ConfigChannel(&htim2, &sConfigIC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_FALLING;
+  sConfigIC.ICSelection = TIM_ICSELECTION_INDIRECTTI;
+  if (HAL_TIM_IC_ConfigChannel(&htim2, &sConfigIC, TIM_CHANNEL_2) != HAL_OK)
   {
     Error_Handler();
   }
