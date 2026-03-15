@@ -57,6 +57,8 @@ int main()
     }
 }
 
+
+//Stm32CubeIDE generated functions
 void SystemClock_Config(void)
 {
     RCC_OscInitTypeDef RCC_OscInitStruct = {};
