@@ -41,9 +41,7 @@ char **environ = __env;
 
 
 /* Functions */
-void initialise_monitor_handles()
-{
-}
+void initialise_monitor_handles(void);
 
 int _getpid(void)
 {
