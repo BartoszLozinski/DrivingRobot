@@ -81,7 +81,7 @@ int __io_putchar(int ch)
   * @brief  The application entry point.
   * @retval int
   */
-int main(void)
+int main()
 {
 
   /* USER CODE BEGIN 1 */
@@ -131,10 +131,10 @@ int main(void)
   uint32_t adcValue = 0;
   float airSoundVelocity = 340.f; // m / s
   float distance = 0.f; //cm
-  static const unsigned us_in_s = 1000000;
-  static const uint16_t ADC_MAX_VALUE = 4096;
-  static const float ADC_MAX_VOLTAGE = 3.3f;
-  static const uint8_t V_TO_C_CONVERSION = 100; // [C/V]
+  static constexpr unsigned us_in_s = 1000000;
+  static constexpr uint16_t ADC_MAX_VALUE = 4096;
+  static constexpr float ADC_MAX_VOLTAGE = 3.3f;
+  static constexpr uint8_t V_TO_C_CONVERSION = 100; // [C/V]
 
   while (1)
   {
@@ -164,8 +164,8 @@ int main(void)
   */
 void SystemClock_Config(void)
 {
-  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
-  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+  RCC_OscInitTypeDef RCC_OscInitStruct = {};
+  RCC_ClkInitTypeDef RCC_ClkInitStruct = {};
 
   /** Configure the main internal regulator output voltage
   */
@@ -219,8 +219,8 @@ static void MX_ADC1_Init(void)
 
   /* USER CODE END ADC1_Init 0 */
 
-  ADC_MultiModeTypeDef multimode = {0};
-  ADC_ChannelConfTypeDef sConfig = {0};
+  ADC_MultiModeTypeDef multimode = {};
+  ADC_ChannelConfTypeDef sConfig = {};
 
   /* USER CODE BEGIN ADC1_Init 1 */
 
@@ -286,10 +286,10 @@ static void MX_TIM2_Init(void)
 
   /* USER CODE END TIM2_Init 0 */
 
-  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
-  TIM_MasterConfigTypeDef sMasterConfig = {0};
-  TIM_IC_InitTypeDef sConfigIC = {0};
-  TIM_OC_InitTypeDef sConfigOC = {0};
+  TIM_ClockConfigTypeDef sClockSourceConfig = {};
+  TIM_MasterConfigTypeDef sMasterConfig = {};
+  TIM_IC_InitTypeDef sConfigIC = {};
+  TIM_OC_InitTypeDef sConfigOC = {};
 
   /* USER CODE BEGIN TIM2_Init 1 */
 
