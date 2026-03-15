@@ -1,29 +1,34 @@
+set(target_name STM32_HAL)
 include(../cmake/compiler_flags.cmake)
 
-set(INCLUDE_DIRS
-    CMSIS/Device/ST/STM32L4xx/Include
-    CMSIS/Include
-    STM32L4xx_HAL_Driver/Inc
-    STM32L4xx_HAL_Driver/Legacy
-)
+add_library(${target_name}   STATIC)
 
 file(GLOB HAL_SOURCES
     STM32L4xx_HAL_Driver/Src/*.c
 )
 
-set(GLOBAL_DEFINES      STM32L476xx
-                        USE_HAL_DRIVER
+target_sources(${target_name}
+    PRIVATE
+        ${HAL_SOURCES})
+
+target_compile_options(${target_name}
+    PRIVATE
+        -Wall
+        -Wextra
 )
 
-set(HAL_FLAGS   -Wall -Wextra)
-
-add_library(STM32_HAL   STATIC  ${C_HAL_SRC} ${HAL_SOURCES})
-
-target_compile_options(STM32_HAL        PRIVATE     ${HAL_FLAGS})
-target_include_directories(STM32_HAL
+target_include_directories(${target_name}
+    PRIVATE
+        STM32L4xx_HAL_Driver/Legacy
     PUBLIC
         ${CMAKE_SOURCE_DIR}/Core/Inc
-        ${INCLUDE_DIRS}
+        CMSIS/Device/ST/STM32L4xx/Include
+        CMSIS/Include
+        STM32L4xx_HAL_Driver/Inc
 )
 
-target_compile_definitions(STM32_HAL    PUBLIC      ${GLOBAL_DEFINES})
+target_compile_definitions(${target_name}
+    PRIVATE
+        STM32L476xx
+        USE_HAL_DRIVER
+)
