@@ -1,5 +1,9 @@
 #include "main.h"
+
 #include <stdio.h>
+#include <cstring>
+
+#include "../../Peripherals/Basic/ADC/AdcHAL.hpp"
 
 ADC_HandleTypeDef hadc1;
 TIM_HandleTypeDef htim2;
@@ -26,8 +30,10 @@ int main()
     HAL_TIM_IC_Start(&htim2, TIM_CHANNEL_1);
     HAL_TIM_IC_Start(&htim2, TIM_CHANNEL_2);
     HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_3);
-    HAL_ADCEx_Calibration_Start(&hadc1, ADC_SINGLE_ENDED);
-    HAL_ADC_Start(&hadc1);
+    //HAL_ADCEx_Calibration_Start(&hadc1, ADC_SINGLE_ENDED);
+    //HAL_ADC_Start(&hadc1);
+    Peripherals::AdcHAL adc1{ hadc1 };
+    
     HAL_Delay(1000);
     uint32_t start = 0;
     uint32_t stop = 0;
@@ -42,7 +48,8 @@ int main()
     char stringBuffer[64];
     while (1)
     {
-        adcValue = HAL_ADC_GetValue(&hadc1);
+        //adcValue = HAL_ADC_GetValue(&hadc1);
+        adcValue = adc1.Read();
         temp = adcValue * V_TO_C_CONVERSION * ADC_MAX_VOLTAGE / ADC_MAX_VALUE;
         airSoundVelocity = 331.8f + 0.6f * temp;
         start = HAL_TIM_ReadCapturedValue(&htim2, TIM_CHANNEL_1);
@@ -50,9 +57,9 @@ int main()
         distance = (stop - start) * (airSoundVelocity / (2 * us_in_s)) * 100;
         
         snprintf(stringBuffer, sizeof(stringBuffer), "Distance: %.1f [cm]\r\n", distance);
-        HAL_UART_Transmit(&huart2, reinterpret_cast<uint8_t*>(stringBuffer), sizeof(stringBuffer) - 1, HAL_MAX_DELAY);
+        HAL_UART_Transmit(&huart2, reinterpret_cast<uint8_t*>(stringBuffer), strlen(stringBuffer), HAL_MAX_DELAY);
         snprintf(stringBuffer, sizeof(stringBuffer), "ADC: %lu[-], Temp: %.1f [C], AirSoundVelocity: %.1f [m/s]\r\n", adcValue, temp, airSoundVelocity);
-        HAL_UART_Transmit(&huart2, reinterpret_cast<uint8_t*>(stringBuffer), sizeof(stringBuffer) - 1, HAL_MAX_DELAY);
+        HAL_UART_Transmit(&huart2, reinterpret_cast<uint8_t*>(stringBuffer), strlen(stringBuffer), HAL_MAX_DELAY);
         HAL_Delay(500);
     }
 }

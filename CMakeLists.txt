@@ -8,4 +8,5 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_C_EXTENSIONS OFF)
 
 add_subdirectory(Drivers)
+add_subdirectory(Peripherals)
 add_subdirectory(Core)
