@@ -21,5 +21,15 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 # set(CMAKE_C_COMPILER_WORKS TRUE)
 # set(CMAKE_CXX_COMPILER_WORKS TRUE)
 
+set(CORE_FLAGS  "-mcpu=cortex-m4\
+                -mthumb\
+                -mfloat-abi=hard\
+                -mfpu=fpv4-sp-d16\
+                -ffast-math")              
+
+set(CMAKE_C_FLAGS_INIT  ${CORE_FLAGS})
+set(CMAKE_CXX_FLAGS_INIT  ${CORE_FLAGS})
+set(CMAKE_ASM_FLAGS_INIT  ${CORE_FLAGS})
+
 # Remove default static libraries
 set(CMAKE_C_STANDARD_LIBRARIES "")
