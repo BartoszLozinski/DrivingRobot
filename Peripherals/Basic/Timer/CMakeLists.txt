@@ -1,10 +1,13 @@
 set(target_name Timer)
 
 set(${target_name}_src  SoftwareTimerHAL.cpp
+                        InputCaptureHAL.cpp
 )
 
 set(${target_name}_hpp  TimerBase.hpp
                         SoftwareTimerHAL.hpp
+                        InputCaptureInterface.hpp
+                        InputCaptureHAL.hpp
 )
 
 add_library(${target_name} STATIC ${${target_name}_src})
