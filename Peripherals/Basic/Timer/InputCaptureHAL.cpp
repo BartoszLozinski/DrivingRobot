@@ -5,9 +5,7 @@ namespace Peripherals
     InputCaptureHAL::InputCaptureHAL(TIM_HandleTypeDef& timer_, const uint32_t channel_)
         : timer(timer_)
         , channel(channel_)
-    {
-        Init();
-    }
+    {}
 
     void InputCaptureHAL::Init_Impl()
     {
