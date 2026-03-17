@@ -18,6 +18,7 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
     PRIVATE
         STM32_HAL
         ADC
+        Timer
 )
 target_compile_definitions(${CMAKE_PROJECT_NAME}
     PUBLIC 

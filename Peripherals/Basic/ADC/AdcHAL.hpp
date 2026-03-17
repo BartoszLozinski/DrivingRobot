@@ -29,6 +29,5 @@ namespace Peripherals
         ~AdcHAL() = default;
 
         AdcHAL(ADC_HandleTypeDef& adc_);
-
     };
 }
