@@ -15,7 +15,7 @@ namespace Peripherals
         uint32_t channel = 0;
 
         void Init_Impl();
-        uint32_t Read_Impl();
+        [[nodiscard]] uint32_t Read_Impl();
         
     public:
         InputCaptureHAL() = delete;
