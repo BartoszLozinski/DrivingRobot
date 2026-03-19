@@ -3,10 +3,10 @@
 #include <stdio.h>
 #include <cstring>
 
-#include "../../Peripherals/Basic/ADC/AdcHAL.hpp"
-#include "../../Peripherals/Basic/Timer/SoftwareTimerHAL.hpp"
-#include "../../Peripherals/Basic/Timer/InputCaptureHAL.hpp"
-#include "../../Peripherals/Basic/Timer/PwmHAL.hpp"
+#include "../../Peripherals/ADC/HAL/Adc.hpp"
+#include "../../Peripherals/Timer/SoftwareTimerHAL.hpp"
+#include "../../Peripherals/Timer/InputCaptureHAL.hpp"
+#include "../../Peripherals/Timer/PwmHAL.hpp"
 
 ADC_HandleTypeDef hadc1;
 TIM_HandleTypeDef htim2;
@@ -30,8 +30,7 @@ int main()
     MX_USART2_UART_Init();
     MX_TIM2_Init();
     MX_ADC1_Init();
-    //HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_3); //PB10
-    Peripherals::AdcHAL adc1{ hadc1 };
+    Peripherals::HAL::Adc adc1{ hadc1 };
     Peripherals::InputCaptureHAL timer2Channel1Rising{ htim2, TIM_CHANNEL_1 }; //PA0
     Peripherals::InputCaptureHAL timer2Channel2Falling{ htim2, TIM_CHANNEL_2 }; //PA0
     Peripherals::PwmHAL distanceMeasurementTrigger{ htim2, TIM_CHANNEL_3 }; //PB10

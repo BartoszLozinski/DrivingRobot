@@ -17,7 +17,7 @@ target_include_directories(${CMAKE_PROJECT_NAME}    PRIVATE     Core/Inc)
 target_link_libraries(${CMAKE_PROJECT_NAME}
     PRIVATE
         STM32_HAL
-        ADC
+        ADC_HAL
         Timer
 )
 target_compile_definitions(${CMAKE_PROJECT_NAME}
