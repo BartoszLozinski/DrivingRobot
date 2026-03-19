@@ -7,6 +7,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_C_EXTENSIONS OFF)
 
+add_compile_options(${CORE_FLAGS})
+add_link_options(${CORE_FLAGS})
+
 add_subdirectory(Drivers)
 add_subdirectory(Peripherals)
 add_subdirectory(Core)

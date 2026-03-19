@@ -6,6 +6,7 @@
 #include "../../Peripherals/Basic/ADC/AdcHAL.hpp"
 #include "../../Peripherals/Basic/Timer/SoftwareTimerHAL.hpp"
 #include "../../Peripherals/Basic/Timer/InputCaptureHAL.hpp"
+#include "../../Peripherals/Basic/Timer/PwmHAL.hpp"
 
 ADC_HandleTypeDef hadc1;
 TIM_HandleTypeDef htim2;
@@ -29,14 +30,17 @@ int main()
     MX_USART2_UART_Init();
     MX_TIM2_Init();
     MX_ADC1_Init();
-    HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_3);
-
-    HAL_GetTick();
+    HAL_TIM_IC_Start(&htim2, TIM_CHANNEL_1);
+    HAL_TIM_IC_Start(&htim2, TIM_CHANNEL_2);
+    HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_3); //PB10
     Peripherals::AdcHAL adc1{ hadc1 };
-    Peripherals::InputCaptureHAL timer2Channel1Rising{ htim2, TIM_CHANNEL_1 };
-    Peripherals::InputCaptureHAL timer2Channel2Falling{ htim2, TIM_CHANNEL_2 };
+    //Peripherals::InputCaptureHAL timer2Channel1Rising{ htim2, TIM_CHANNEL_1 }; //PA0
+    //Peripherals::InputCaptureHAL timer2Channel2Falling{ htim2, TIM_CHANNEL_2 }; //PA0
+    //Peripherals::PwmHAL distanceMeasurementTrigger{ htim2, TIM_CHANNEL_3 };
 
-    HAL_Delay(100);
+    //distanceMeasurementTrigger.Start();
+
+    HAL_Delay(1000);
     uint32_t start = 0;
     uint32_t stop = 0;
     float temp = 0;
@@ -57,8 +61,10 @@ int main()
             adcValue = adc1.Read();
             temp = adcValue * V_TO_C_CONVERSION * ADC_MAX_VOLTAGE / ADC_MAX_VALUE;
             airSoundVelocity = 331.8f + 0.6f * temp;
-            start = timer2Channel1Rising.Read();
-            stop = timer2Channel2Falling.Read();
+            start = HAL_TIM_ReadCapturedValue(&htim2, TIM_CHANNEL_1);
+            stop = HAL_TIM_ReadCapturedValue(&htim2, TIM_CHANNEL_2);
+            //start = timer2Channel1Rising.Read();
+            //stop = timer2Channel2Falling.Read();
             distance = (stop - start) * (airSoundVelocity / (2 * us_in_s)) * 100;
             
             snprintf(stringBuffer, sizeof(stringBuffer), "Distance: %.1f [cm]\r\n", distance);
