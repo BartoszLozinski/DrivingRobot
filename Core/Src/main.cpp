@@ -7,6 +7,7 @@
 #include "../../Peripherals/Timer/HAL/SoftwareTimer.hpp"
 #include "../../Peripherals/Timer/HAL/InputCapture.hpp"
 #include "../../Peripherals/Timer/HAL/Pwm.hpp"
+#include "../../Devices/HC_SR04/HC_SR04.hpp"
 
 ADC_HandleTypeDef hadc1;
 TIM_HandleTypeDef htim2;
@@ -30,26 +31,26 @@ int main()
     MX_USART2_UART_Init();
     MX_TIM2_Init();
     MX_ADC1_Init();
+
+
+
+    
     Peripherals::HAL::Adc adc1{ hadc1 };
     Peripherals::HAL::InputCapture timer2Channel1Rising{ htim2, TIM_CHANNEL_1 }; //PA0
     Peripherals::HAL::InputCapture timer2Channel2Falling{ htim2, TIM_CHANNEL_2 }; //PA0
     Peripherals::HAL::Pwm distanceMeasurementTrigger{ htim2, TIM_CHANNEL_3 }; //PB10
 
     distanceMeasurementTrigger.Start();
-
+    //HAL_TIM_PWM_GetState();
     HAL_Delay(1000);
-    uint32_t start = 0;
-    uint32_t stop = 0;
     float temp = 0;
     uint32_t adcValue = 0;
-    float airSoundVelocity = 340.f; // m / s
-    float distance = 0.f; //cm
-    static constexpr unsigned us_in_s = 1000000;
     static constexpr uint16_t ADC_MAX_VALUE = 4096;
     static constexpr float ADC_MAX_VOLTAGE = 3.3f;
     static constexpr uint8_t V_TO_C_CONVERSION = 100; // [C/V]
     char stringBuffer[64];
     HAL::SoftwareTimer distanceMeasurementTimer{ 500 };
+    Device::HC_SR04 hc_sr04{ timer2Channel1Rising, timer2Channel2Falling };
     while (true)
     {
         if (distanceMeasurementTimer.IsExpired())
@@ -57,18 +58,15 @@ int main()
             distanceMeasurementTimer.Reset();
             adcValue = adc1.Read();
             temp = adcValue * V_TO_C_CONVERSION * ADC_MAX_VOLTAGE / ADC_MAX_VALUE;
-            airSoundVelocity = 331.8f + 0.6f * temp;
-            start = timer2Channel1Rising.Read();
-            stop = timer2Channel2Falling.Read();
-            distance = (stop - start) * (airSoundVelocity / (2 * us_in_s)) * 100;
-            
-            snprintf(stringBuffer, sizeof(stringBuffer), "Distance: %.1f [cm]\r\n", distance);
+
+            snprintf(stringBuffer, sizeof(stringBuffer), "Distance: %.1f [cm]\r\n", hc_sr04.GetDistance(temp));
             HAL_UART_Transmit(&huart2, reinterpret_cast<uint8_t*>(stringBuffer), strlen(stringBuffer), HAL_MAX_DELAY);
-            snprintf(stringBuffer, sizeof(stringBuffer), "ADC: %lu[-], Temp: %.1f [C], AirSoundVelocity: %.1f [m/s]\r\n", adcValue, temp, airSoundVelocity);
+            snprintf(stringBuffer, sizeof(stringBuffer), "ADC: %lu[-], Temp: %.1f [C]\r\n", adcValue, temp);
             HAL_UART_Transmit(&huart2, reinterpret_cast<uint8_t*>(stringBuffer), strlen(stringBuffer), HAL_MAX_DELAY);
         }
     }
 }
+
 
 
 //Stm32CubeIDE generated functions

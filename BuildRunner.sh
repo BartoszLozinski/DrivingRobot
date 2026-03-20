@@ -9,3 +9,14 @@ cmake .. -G Ninja -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchain-arm-gcc.cmake -DCMAK
 ninja
 
 cd ..
+
+if [ ! -d buildTests ]; then
+    mkdir buildTests
+fi
+
+cd buildTests
+cmake ../UnitTests -G Ninja -DCMAKE_BUILD_TYPE=Debug
+ninja
+
+cd ..
+

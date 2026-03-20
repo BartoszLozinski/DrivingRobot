@@ -13,7 +13,7 @@ set(${target_name}_hpp  ../TimerBase.hpp
                         Pwm.hpp
 )
 
-add_library(${target_name} STATIC ${${target_name}_src})
+add_library(${target_name} STATIC)
 
 cmake_path(GET  CMAKE_CURRENT_SOURCE_DIR    PARENT_PATH     PERIHPERALS_DIR)
 
