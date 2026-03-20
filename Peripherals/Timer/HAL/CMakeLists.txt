@@ -1,21 +1,32 @@
 set(target_name Timer)
 
-set(${target_name}_src  SoftwareTimerHAL.cpp
-                        InputCaptureHAL.cpp
-                        PwmHAL.cpp
+set(${target_name}_src  SoftwareTimer.cpp
+                        InputCapture.cpp
+                        Pwm.cpp
 )
 
-set(${target_name}_hpp  TimerBase.hpp
-                        SoftwareTimerHAL.hpp
-                        InputCaptureInterface.hpp
-                        InputCaptureHAL.hpp
-                        IPwm.hpp
-                        PwmHAL.hpp
+set(${target_name}_hpp  ../TimerBase.hpp
+                        SoftwareTimer.hpp
+                        ../InputCaptureInterface.hpp
+                        InputCapture.hpp
+                        ../IPwm.hpp
+                        Pwm.hpp
 )
 
 add_library(${target_name} STATIC ${${target_name}_src})
 
 target_include_directories(${target_name} PRIVATE ${CMAKE_SOURCE_DIR})
+
+cmake_path(GET  CMAKE_CURRENT_SOURCE_DIR    PARENT_PATH     PERIHPERALS_DIR)
+
+target_sources(${target_name}
+    PRIVATE
+        ${${target_name}_src}
+    PUBLIC
+        FILE_SET HEADERS
+        BASE_DIRS ${PERIHPERALS_DIR}
+        FILES ${${target_name}_hpp}
+)
 
 target_link_libraries(${target_name}    PRIVATE     STM32_HAL)
 target_compile_options(${target_name}   PRIVATE     -Wall

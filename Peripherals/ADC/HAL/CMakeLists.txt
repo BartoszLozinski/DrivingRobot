@@ -20,7 +20,6 @@ target_sources(${target_name}
         FILE_SET HEADERS
         BASE_DIRS ${PERIHPERALS_DIR}
         FILES ${${target_name}_hpp}
-
 )
 
 target_link_libraries(${target_name}    PRIVATE     STM32_HAL)

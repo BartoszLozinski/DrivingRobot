@@ -4,9 +4,9 @@
 #include <cstring>
 
 #include "../../Peripherals/ADC/HAL/Adc.hpp"
-#include "../../Peripherals/Timer/SoftwareTimerHAL.hpp"
-#include "../../Peripherals/Timer/InputCaptureHAL.hpp"
-#include "../../Peripherals/Timer/PwmHAL.hpp"
+#include "../../Peripherals/Timer/HAL/SoftwareTimer.hpp"
+#include "../../Peripherals/Timer/HAL/InputCapture.hpp"
+#include "../../Peripherals/Timer/HAL/Pwm.hpp"
 
 ADC_HandleTypeDef hadc1;
 TIM_HandleTypeDef htim2;
@@ -31,9 +31,9 @@ int main()
     MX_TIM2_Init();
     MX_ADC1_Init();
     Peripherals::HAL::Adc adc1{ hadc1 };
-    Peripherals::InputCaptureHAL timer2Channel1Rising{ htim2, TIM_CHANNEL_1 }; //PA0
-    Peripherals::InputCaptureHAL timer2Channel2Falling{ htim2, TIM_CHANNEL_2 }; //PA0
-    Peripherals::PwmHAL distanceMeasurementTrigger{ htim2, TIM_CHANNEL_3 }; //PB10
+    Peripherals::HAL::InputCapture timer2Channel1Rising{ htim2, TIM_CHANNEL_1 }; //PA0
+    Peripherals::HAL::InputCapture timer2Channel2Falling{ htim2, TIM_CHANNEL_2 }; //PA0
+    Peripherals::HAL::Pwm distanceMeasurementTrigger{ htim2, TIM_CHANNEL_3 }; //PB10
 
     distanceMeasurementTrigger.Start();
 
@@ -49,7 +49,7 @@ int main()
     static constexpr float ADC_MAX_VOLTAGE = 3.3f;
     static constexpr uint8_t V_TO_C_CONVERSION = 100; // [C/V]
     char stringBuffer[64];
-    SoftwareTimerHAL distanceMeasurementTimer{ 500 };
+    HAL::SoftwareTimer distanceMeasurementTimer{ 500 };
     while (true)
     {
         if (distanceMeasurementTimer.IsExpired())
