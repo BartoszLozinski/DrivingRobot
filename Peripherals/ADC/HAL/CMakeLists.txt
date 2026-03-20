@@ -9,13 +9,12 @@ set(${target_name}_hpp  ../AdcBase.hpp
 
 add_library(${target_name} STATIC ${${target_name}_src})
 
-target_include_directories(${target_name} PRIVATE ${CMAKE_SOURCE_DIR})
-
 cmake_path(GET  CMAKE_CURRENT_SOURCE_DIR    PARENT_PATH     PERIHPERALS_DIR)
 
 target_sources(${target_name}
     PRIVATE
         ${${target_name}_src}
+        ${CMAKE_SOURCE_DIR}
     PUBLIC
         FILE_SET HEADERS
         BASE_DIRS ${PERIHPERALS_DIR}

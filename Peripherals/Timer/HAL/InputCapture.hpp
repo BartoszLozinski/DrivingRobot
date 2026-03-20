@@ -16,7 +16,7 @@ namespace Peripherals
             TIM_HandleTypeDef& timer;
             uint32_t channel = 0;
 
-            void Init_Impl();
+            void Init();
             [[nodiscard]] uint32_t Read_Impl();
             
         public:

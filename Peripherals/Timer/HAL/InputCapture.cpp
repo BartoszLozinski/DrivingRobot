@@ -11,7 +11,7 @@ namespace Peripherals
             Init();
         }
 
-        void InputCapture::Init_Impl()
+        void InputCapture::Init()
         {
             HAL_TIM_IC_Start(&timer, channel);
         };
