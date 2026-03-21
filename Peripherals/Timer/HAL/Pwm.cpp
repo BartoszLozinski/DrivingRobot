@@ -9,6 +9,11 @@ namespace Peripherals
             , channel(channel_)
         {};
 
+        PwmState Pwm::GetState_Impl() const
+        {
+            return static_cast<PwmState>(HAL_TIM_PWM_GetState(&timer));
+        };
+
         void Pwm::Start_Impl()
         {
             HAL_TIM_PWM_Start(&timer, channel);

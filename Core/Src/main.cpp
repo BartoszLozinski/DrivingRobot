@@ -7,7 +7,7 @@
 #include "../../Peripherals/Timer/HAL/SoftwareTimer.hpp"
 #include "../../Peripherals/Timer/HAL/InputCapture.hpp"
 #include "../../Peripherals/Timer/HAL/Pwm.hpp"
-#include "../../Devices/HC_SR04/HC_SR04.hpp"
+#include "../../Devices/HC_SR04.hpp"
 
 ADC_HandleTypeDef hadc1;
 TIM_HandleTypeDef htim2;
@@ -40,8 +40,6 @@ int main()
     Peripherals::HAL::InputCapture timer2Channel2Falling{ htim2, TIM_CHANNEL_2 }; //PA0
     Peripherals::HAL::Pwm distanceMeasurementTrigger{ htim2, TIM_CHANNEL_3 }; //PB10
 
-    distanceMeasurementTrigger.Start();
-    //HAL_TIM_PWM_GetState();
     HAL_Delay(1000);
     float temp = 0;
     uint32_t adcValue = 0;
@@ -50,7 +48,7 @@ int main()
     static constexpr uint8_t V_TO_C_CONVERSION = 100; // [C/V]
     char stringBuffer[64];
     HAL::SoftwareTimer distanceMeasurementTimer{ 500 };
-    Device::HC_SR04 hc_sr04{ timer2Channel1Rising, timer2Channel2Falling };
+    Device::HC_SR04 hc_sr04{ timer2Channel1Rising, timer2Channel2Falling, distanceMeasurementTrigger };
     while (true)
     {
         if (distanceMeasurementTimer.IsExpired())

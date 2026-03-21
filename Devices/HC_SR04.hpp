@@ -2,8 +2,9 @@
 
 #include <type_traits>
 #include <concepts>
-
 #include <cstdint>
+
+#include "../Peripherals/Timer/IPwm.hpp"
 
 template<typename T>
 concept InputCaptureConcept = requires (T inputCapture)
@@ -15,19 +16,19 @@ template<typename T>
 concept PwmConcept = requires (T pwm, const uint32_t pulse)
 {
     pwm.Start();
-    pwm.Stop();
+    pwm.GetState();
+    requires std::convertible_to<decltype(pwm.GetState()), Peripherals::PwmState>;
 };
 
 namespace Device
 {
-    template<InputCaptureConcept InputCapture_T/*, PwmConcept Pwm_T*/>
+    template<InputCaptureConcept InputCapture_T, PwmConcept Pwm_T>
     class HC_SR04
     {
     private:
         InputCapture_T& echoRisingEdge;
         InputCapture_T& echoFallingEdge;
-        //Pwm_T& trigger; //todo add getState to PWM
-        // and start pwm if it's in reset state
+        Pwm_T& trigger;
         
         // returns air sound velocity in [m/s]
         float CalculateAirSoundVelocity(const float tempC)
@@ -44,10 +45,14 @@ namespace Device
         HC_SR04& operator=(HC_SR04&&) = delete;
         ~HC_SR04() = default;
 
-        HC_SR04(InputCapture_T& echoRisingEdge_, InputCapture_T& echoFallingEdge_)
+        HC_SR04(InputCapture_T& echoRisingEdge_, InputCapture_T& echoFallingEdge_, Pwm_T& trigger_)
             : echoRisingEdge(echoRisingEdge_)
             , echoFallingEdge(echoFallingEdge_)
-        {};
+            , trigger(trigger_)
+        {
+            if (trigger.GetState() == Peripherals::PwmState::READY)
+                trigger.Start();
+        };
 
         // return distance in [cm]
         float GetDistance(const float tempC = 20.f)
