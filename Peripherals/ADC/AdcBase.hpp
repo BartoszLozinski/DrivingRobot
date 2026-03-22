@@ -6,14 +6,12 @@ namespace Peripherals
     class AdcBase
     {
     protected:
-
         void Start() { static_cast<Implementation*>(this)->Start_Impl(); };
         void Calibrate() {static_cast<Implementation*>(this)->Calibrate_Impl(); }
 
-        AdcBase() = default;
-
     public:
 
-        uint32_t Read() { return static_cast<Implementation*>(this)->Read_Impl(); } 
+        uint32_t Read() const { return static_cast<const Implementation*>(this)->Read_Impl(); } 
+        float ReadVoltage() const { return Read() * Implementation::voltageRef / Implementation::maxValue; }
     };
 }

@@ -7,7 +7,9 @@
 #include "../../Peripherals/Timer/HAL/SoftwareTimer.hpp"
 #include "../../Peripherals/Timer/HAL/InputCapture.hpp"
 #include "../../Peripherals/Timer/HAL/Pwm.hpp"
+
 #include "../../Devices/HC_SR04.hpp"
+#include "../../Devices/LM35.hpp"
 
 ADC_HandleTypeDef hadc1;
 TIM_HandleTypeDef htim2;
@@ -43,20 +45,18 @@ int main()
     HAL_Delay(1000);
     float temp = 0;
     uint32_t adcValue = 0;
-    static constexpr uint16_t ADC_MAX_VALUE = 4096;
-    static constexpr float ADC_MAX_VOLTAGE = 3.3f;
-    static constexpr uint8_t V_TO_C_CONVERSION = 100; // [C/V]
     char stringBuffer[64];
     HAL::SoftwareTimer distanceMeasurementTimer{ 500 };
     Device::HC_SR04 hc_sr04{ timer2Channel1Rising, timer2Channel2Falling, distanceMeasurementTrigger };
+    Device::LM35 lm35{ adc1 };
+
     while (true)
     {
         if (distanceMeasurementTimer.IsExpired())
         {
             distanceMeasurementTimer.Reset();
             adcValue = adc1.Read();
-            temp = adcValue * V_TO_C_CONVERSION * ADC_MAX_VOLTAGE / ADC_MAX_VALUE;
-
+            temp = lm35.ReadTempC();
             snprintf(stringBuffer, sizeof(stringBuffer), "Distance: %.1f [cm]\r\n", hc_sr04.GetDistance(temp));
             HAL_UART_Transmit(&huart2, reinterpret_cast<uint8_t*>(stringBuffer), strlen(stringBuffer), HAL_MAX_DELAY);
             snprintf(stringBuffer, sizeof(stringBuffer), "ADC: %lu[-], Temp: %.1f [C]\r\n", adcValue, temp);

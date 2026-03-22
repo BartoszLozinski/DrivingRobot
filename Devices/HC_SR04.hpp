@@ -22,6 +22,7 @@ concept PwmConcept = requires (T pwm, const uint32_t pulse)
 
 namespace Device
 {
+    //Distance measurement
     template<InputCaptureConcept InputCapture_T, PwmConcept Pwm_T>
     class HC_SR04
     {

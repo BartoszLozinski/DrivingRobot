@@ -20,9 +20,12 @@ namespace Peripherals
             ADC_HandleTypeDef& adc;
             void Start_Impl();
             void Calibrate_Impl();
-            uint32_t Read_Impl();
+            uint32_t Read_Impl() const;
 
         public:
+            static constexpr uint16_t maxValue = 4096;
+            static constexpr float voltageRef = 3.3f;
+            
             Adc() = delete;
             Adc(const Adc&) = delete;
             Adc(Adc&&) = delete;
@@ -30,7 +33,7 @@ namespace Peripherals
             Adc& operator=(Adc&&) = delete;
             ~Adc() = default;
 
-            Adc(ADC_HandleTypeDef& adc_);
+            explicit Adc(ADC_HandleTypeDef& adc_);
         };
     };
 }

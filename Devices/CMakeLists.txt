@@ -1,8 +1,9 @@
-set(target_name HC_SR04)
+set(target_name Devices)
 
 set(${target_name}_src  )
 
-set(${target_name}_hpp  HC_SR04.hpp)
+set(${target_name}_hpp  HC_SR04.hpp
+                        LM35.hpp)
 
 add_library(${target_name}  STATIC)
 

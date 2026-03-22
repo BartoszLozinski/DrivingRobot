@@ -21,7 +21,7 @@ namespace Peripherals
             HAL_ADC_Start(&adc);
         };
 
-        uint32_t Adc::Read_Impl()
+        uint32_t Adc::Read_Impl() const
         {
             return HAL_ADC_GetValue(&adc);
         }
