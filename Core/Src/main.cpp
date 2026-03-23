@@ -49,7 +49,9 @@ int main()
     float temp = 0;
     uint32_t adcValue = 0;
     char stringBuffer[64];
-    HAL::SoftwareTimer distanceMeasurementTimer{ 500 };
+    HAL::SoftwareTimer distanceMeasurementTimer{ 250 };
+    HAL::SoftwareTimer printingTimer{ 500 };
+
     Device::HC_SR04 hc_sr04{ timer2Channel1Rising, timer2Channel2Falling, distanceMeasurementTrigger };
     Device::LM35 lm35{ adc1 };
 
@@ -60,6 +62,11 @@ int main()
             distanceMeasurementTimer.Reset();
             adcValue = adc1.Read();
             temp = lm35.ReadTempC();
+        }
+
+        if (printingTimer.IsExpired())
+        {
+            printingTimer.Reset();
             snprintf(stringBuffer, sizeof(stringBuffer), "Distance: %.1f [cm]\r\n", hc_sr04.GetDistance(temp));
             HAL_UART_Transmit(&huart2, reinterpret_cast<uint8_t*>(stringBuffer), strlen(stringBuffer), HAL_MAX_DELAY);
             snprintf(stringBuffer, sizeof(stringBuffer), "ADC: %lu[-], Temp: %.1f [C]\r\n", adcValue, temp);
