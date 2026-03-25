@@ -22,6 +22,8 @@ namespace Peripherals
             void Stop_Impl();
             void SetPulse_Impl(const uint32_t pulse);
             PwmState GetState_Impl() const;
+            void ResetCounter_Impl();
+            
         public:
             Pwm() = delete;
             Pwm(const Pwm&) = delete;

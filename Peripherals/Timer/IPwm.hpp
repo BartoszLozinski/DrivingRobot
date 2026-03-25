@@ -23,6 +23,7 @@ namespace Peripherals
         void Stop() { static_cast<Implementation*>(this)->Stop_Impl(); };
         void SetPulse(const uint32_t pulse) { static_cast<Implementation*>(this)->SetPulse_Impl(pulse); };
         PwmState GetState() const { return static_cast<const Implementation*>(this)->GetState_Impl(); };
+        void ResetCounter() { static_cast<Implementation*>(this)->ResetCounter_Impl(); }
         ~IPwm() = default;
     };
 };

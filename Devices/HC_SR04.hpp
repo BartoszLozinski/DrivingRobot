@@ -55,13 +55,25 @@ namespace Device
                 trigger.Start();
         };
 
-        // return distance in [cm]
-        float GetDistance(const float tempC = 20.f)
+        void Trigger() const
         {
+            trigger.ResetCounter();
+            trigger.Start();
+        }
+
+        // return distance in [cm]
+        float GetDistance(const uint32_t start, const uint32_t stop, const float tempC = 20.f)
+        {
+            const uint32_t timerPeriod = 0xFFFF;
+            uint32_t delta;
+
+            if (stop >= start)
+                delta = stop - start;
+            else
+                delta = (timerPeriod - start) + stop + 1;
+
             static constexpr unsigned us_in_s = 1'000'000;
-            const auto start = echoRisingEdge.Read();
-            const auto stop = echoFallingEdge.Read();
-            return (stop -start) * (CalculateAirSoundVelocity(tempC) / (2 * us_in_s)) * 100;
+            return delta * (CalculateAirSoundVelocity(tempC) / (2 * us_in_s)) * 100;
         }
     };
 };
