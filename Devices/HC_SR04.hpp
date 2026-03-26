@@ -5,6 +5,7 @@
 #include <cstdint>
 
 #include "../Peripherals/Timer/IPwm.hpp"
+#include "../Peripherals/Timer/HAL/SoftwareTimer.hpp"
 
 template<typename T>
 concept InputCaptureConcept = requires (T inputCapture)
@@ -30,11 +31,29 @@ namespace Device
         InputCapture_T& echoRisingEdge;
         InputCapture_T& echoFallingEdge;
         Pwm_T& trigger;
-        
+        HAL::SoftwareTimer distanceMeasurementTimer{ 50 };
+
         // returns air sound velocity in [m/s]
         float CalculateAirSoundVelocity(const float tempC)
         {
             return 331.8f + 0.6f * tempC;
+        }
+
+        float MeasureDeltaTime()
+        {
+            distanceMeasurementTimer.Reset();
+            uint32_t start_prev = echoRisingEdge.Read();
+            uint32_t start = start_prev;
+            while (start == start_prev && !distanceMeasurementTimer.IsExpired())
+                start = echoRisingEdge.Read();
+
+            distanceMeasurementTimer.Reset();
+            uint32_t stop_prev = echoFallingEdge.Read();
+            uint32_t stop = stop_prev;
+            while (stop == stop_prev && !distanceMeasurementTimer.IsExpired())
+                stop = echoFallingEdge.Read();
+            
+            return stop - start;
         }
 
     public:
@@ -51,29 +70,19 @@ namespace Device
             , echoFallingEdge(echoFallingEdge_)
             , trigger(trigger_)
         {
-            if (trigger.GetState() == Peripherals::PwmState::READY)
-                trigger.Start();
         };
 
         void Trigger() const
         {
-            trigger.ResetCounter();
-            trigger.Start();
+            if (trigger.GetState() == Peripherals::PwmState::READY)
+                trigger.Start();
         }
 
         // return distance in [cm]
-        float GetDistance(const uint32_t start, const uint32_t stop, const float tempC = 20.f)
+        float GetDistance(const float tempC = 20.f)
         {
-            const uint32_t timerPeriod = 0xFFFF;
-            uint32_t delta;
-
-            if (stop >= start)
-                delta = stop - start;
-            else
-                delta = (timerPeriod - start) + stop + 1;
-
             static constexpr unsigned us_in_s = 1'000'000;
-            return delta * (CalculateAirSoundVelocity(tempC) / (2 * us_in_s)) * 100;
+            return MeasureDeltaTime() * (CalculateAirSoundVelocity(tempC) / (2 * us_in_s)) * 100;
         }
     };
 };

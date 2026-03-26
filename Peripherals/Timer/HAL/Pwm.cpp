@@ -9,10 +9,13 @@ namespace Peripherals
             : timer(timer_)
             , channel(channel_)
         {
-            HAL_TIM_Base_Init(&timer);
-            //HAL_TIM_PWM_Init(&timer);
-            HAL_TIM_OnePulse_Init(&timer, channel);
+            //cube initialized
         };
+
+        bool Pwm::IsOnePulseEnabled() const
+        {
+            return (timer.Instance->CR1 & TIM_CR1_OPM);
+        }
 
         PwmState Pwm::GetState_Impl() const
         {
@@ -21,10 +24,7 @@ namespace Peripherals
 
         void Pwm::Start_Impl()
         {
-            HAL_TIM_Base_Start(&timer);
-            //HAL_TIM_PWM_Start(&timer, channel);
-            HAL_TIM_OnePulse_Start(&timer, channel);
-            //timer.Instance->CR1 |= TIM_CR1_CEN;
+            HAL_TIM_PWM_Start(&timer, channel);
         }
 
         void Pwm::Stop_Impl()

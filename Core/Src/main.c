@@ -147,7 +147,7 @@ int main(void)
 
 	  start = HAL_TIM_ReadCapturedValue(&htim2, TIM_CHANNEL_1);
 	  stop = HAL_TIM_ReadCapturedValue(&htim2, TIM_CHANNEL_2);
-    distance = (stop - start) * (airSoundVelocity / (2 * us_in_s)) * 100;
+        distance = (stop - start) * (airSoundVelocity / (2 * us_in_s)) * 100;
 	  printf("Distance: %.1f [cm]\n", distance);
 	  printf("ADC: %lu[-], Temp: %.1f [C], AirSoundVelocity: %.1f [m/s]\n", adcValue, temp, airSoundVelocity);
 	  HAL_Delay(500);
@@ -363,7 +363,7 @@ static void MX_TIM3_Init(void)
   htim3.Instance = TIM3;
   htim3.Init.Prescaler = 79;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 10;
+  htim3.Init.Period = 20;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
@@ -376,10 +376,6 @@ static void MX_TIM3_Init(void)
     Error_Handler();
   }
   if (HAL_TIM_PWM_Init(&htim3) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_TIM_OnePulse_Init(&htim3, TIM_OPMODE_SINGLE) != HAL_OK)
   {
     Error_Handler();
   }

@@ -23,6 +23,8 @@ namespace Peripherals
             void SetPulse_Impl(const uint32_t pulse);
             PwmState GetState_Impl() const;
             void ResetCounter_Impl();
+
+            [[nodiscard]] bool IsOnePulseEnabled() const;
             
         public:
             Pwm() = delete;

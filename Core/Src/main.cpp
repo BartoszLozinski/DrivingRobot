@@ -55,25 +55,14 @@ int main()
 
     Device::HC_SR04 hc_sr04{ timer2Channel1Rising, timer2Channel2Falling, distanceMeasurementTrigger };
     Device::LM35 lm35{ adc1 };
+    hc_sr04.Trigger();
 
     while (true)
     {
         adcValue = adc1.Read();
         temp = lm35.ReadTempC();
-
-        hc_sr04.Trigger();
-        distanceMeasurementTimer.Reset();
         
-        uint32_t start = 0;
-        while (start == 0 && !distanceMeasurementTimer.IsExpired())
-            start = timer2Channel1Rising.Read();
-
-        uint32_t stop = start;
-        while (stop == start && !distanceMeasurementTimer.IsExpired())
-            stop = timer2Channel2Falling.Read();
-        
-        distanceMeasurementTimer.Reset();
-        distance = hc_sr04.GetDistance(start, stop, temp);
+        distance = hc_sr04.GetDistance(temp);
 
         if (printingTimer.IsExpired())
         {
@@ -266,7 +255,7 @@ static void MX_TIM3_Init(void)
   htim3.Instance = TIM3;
   htim3.Init.Prescaler = 79;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 10;
+  htim3.Init.Period = 20;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
@@ -279,10 +268,6 @@ static void MX_TIM3_Init(void)
     Error_Handler();
   }
   if (HAL_TIM_PWM_Init(&htim3) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_TIM_OnePulse_Init(&htim3, TIM_OPMODE_SINGLE) != HAL_OK)
   {
     Error_Handler();
   }
@@ -306,7 +291,6 @@ static void MX_TIM3_Init(void)
   HAL_TIM_MspPostInit(&htim3);
 
 }
-
 
 static void MX_GPIO_Init(void)
 {
