@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include "../Devices/HC_SR04.hpp"
 #include "../Peripherals/Timer/TimerBase.hpp"
+
 struct FakeInputCapture
 {
     uint32_t value = 0;
@@ -25,7 +26,6 @@ struct FakeTimer : public TimerBase<FakeTimer>
     uint32_t Now_Impl() const { return 30; }
 };
 
-//add timer abstraciton and dependency on abstraciton only
 TEST(HCSR04Tests, GetDistanceTest)
 {
     FakeInputCapture rising;

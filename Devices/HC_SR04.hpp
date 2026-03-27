@@ -5,7 +5,6 @@
 #include <cstdint>
 
 #include "../Peripherals/Timer/IPwm.hpp"
-#include "../Peripherals/Timer/HAL/SoftwareTimer.hpp"
 
 template<typename T>
 concept InputCaptureConcept = requires (T inputCapture)
