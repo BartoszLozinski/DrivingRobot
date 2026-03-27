@@ -14,11 +14,6 @@ protected:
     {};
 
 public:
-    TimerBase() = delete;
-    TimerBase(const TimerBase&) = delete;
-    TimerBase(TimerBase&&) = delete;
-    TimerBase& operator=(const TimerBase&) = delete;
-    TimerBase& operator=(TimerBase&&) = delete;
 
     [[nodiscard]] bool IsExpired() const
     {

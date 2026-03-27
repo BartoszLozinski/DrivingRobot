@@ -50,10 +50,12 @@ int main()
     float distance = 0.0f;
     uint32_t adcValue = 0;
     char stringBuffer[64];
-    HAL::SoftwareTimer distanceMeasurementTimer{ 50 };
     HAL::SoftwareTimer printingTimer{ 500 };
 
-    Device::HC_SR04 hc_sr04{ timer2Channel1Rising, timer2Channel2Falling, distanceMeasurementTrigger };
+    Device::HC_SR04 hc_sr04{ timer2Channel1Rising
+                           , timer2Channel2Falling
+                           , distanceMeasurementTrigger
+                           , HAL::SoftwareTimer{ 50 }};
     Device::LM35 lm35{ adc1 };
     hc_sr04.Trigger();
 

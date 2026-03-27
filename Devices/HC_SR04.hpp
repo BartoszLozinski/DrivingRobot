@@ -21,17 +21,27 @@ concept PwmConcept = requires (T pwm, const uint32_t pulse)
     requires std::convertible_to<decltype(pwm.GetState()), Peripherals::PwmState>;
 };
 
+template<typename T>
+concept SoftwareTimerConcept = 
+    std::constructible_from<T, uint32_t> &&
+    requires (T timer, uint32_t period)
+{
+    { timer.IsExpired() } -> std::same_as<bool>;
+    { timer.Reset() } -> std::same_as<void>;
+    { timer.Now() } -> std::same_as<uint32_t>; 
+};
+
 namespace Device
 {
     //Distance measurement
-    template<InputCaptureConcept InputCapture_T, PwmConcept Pwm_T>
+    template<InputCaptureConcept InputCapture_T, PwmConcept Pwm_T, SoftwareTimerConcept SoftwareTimer_T>
     class HC_SR04
     {
     private:
         InputCapture_T& echoRisingEdge;
         InputCapture_T& echoFallingEdge;
         Pwm_T& trigger;
-        HAL::SoftwareTimer distanceMeasurementTimer{ 50 };
+        SoftwareTimer_T distanceMeasurementTimer{};
 
         // returns air sound velocity in [m/s]
         float CalculateAirSoundVelocity(const float tempC)
@@ -65,10 +75,11 @@ namespace Device
         HC_SR04& operator=(HC_SR04&&) = delete;
         ~HC_SR04() = default;
 
-        HC_SR04(InputCapture_T& echoRisingEdge_, InputCapture_T& echoFallingEdge_, Pwm_T& trigger_)
+        HC_SR04(InputCapture_T& echoRisingEdge_, InputCapture_T& echoFallingEdge_, Pwm_T& trigger_, const SoftwareTimer_T& distanceMeasurementTimer_)
             : echoRisingEdge(echoRisingEdge_)
             , echoFallingEdge(echoFallingEdge_)
             , trigger(trigger_)
+            , distanceMeasurementTimer(distanceMeasurementTimer_)
         {
         };
 
