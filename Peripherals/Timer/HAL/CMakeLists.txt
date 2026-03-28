@@ -2,6 +2,7 @@ set(target_name Timer)
 
 set(${target_name}_src  SoftwareTimer.cpp
                         InputCapture.cpp
+                        InputCaptureIT.cpp
                         Pwm.cpp
 )
 
@@ -9,6 +10,7 @@ set(${target_name}_hpp  ../TimerBase.hpp
                         SoftwareTimer.hpp
                         ../InputCaptureInterface.hpp
                         InputCapture.hpp
+                        InputCaptureIT.hpp
                         ../IPwm.hpp
                         Pwm.hpp
 )
