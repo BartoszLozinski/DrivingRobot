@@ -7,9 +7,7 @@ namespace Peripherals
         InputCaptureIT::InputCaptureIT(TIM_HandleTypeDef& timer_, const uint32_t channel_)
             : timer(timer_)
             , channel(channel_)
-        {
-            Init();
-        }
+        {}
 
         bool InputCaptureIT::DataUpdated() const
         {
@@ -18,18 +16,23 @@ namespace Peripherals
 
         uint32_t InputCaptureIT::GetValue()
         {
+            //consider std::optional
             dataUpdated = false;
             return value;
         }
 
+        //Needs to be called after MX_Init generated - HAL_TIM_Base_Init function
         void InputCaptureIT::Init()
         {
+            HAL_TIM_Base_Start(&timer);
             HAL_TIM_IC_Start_IT(&timer, channel);
+            __HAL_TIM_ENABLE_IT(&timer, TIM_IT_CC1 | TIM_IT_CC2);
+            __HAL_TIM_ENABLE(&timer);
         };
 
-        void InputCaptureIT::IrqHandler()
+        void InputCaptureIT::IrqHandler(const uint32_t activeChannel)
         {
-            if (timer.Channel == GetActiveChannel(channel))
+            if (channel == activeChannel)
             {
                 value = Read();
                 dataUpdated = true;

@@ -20,9 +20,9 @@ namespace Peripherals
             volatile bool dataUpdated = false;
             volatile uint32_t value = 0;
 
-            void Init();
             [[nodiscard]] uint32_t Read_Impl();
-
+            
+            /*
             static constexpr uint32_t GetActiveChannel(const uint32_t ch)
             {
                 switch (ch)
@@ -36,7 +36,8 @@ namespace Peripherals
                     default: return 0;
                 };
             }
-            
+            */
+
         public:
             InputCaptureIT() = delete;
             InputCaptureIT(const InputCaptureIT&) = delete;
@@ -48,7 +49,8 @@ namespace Peripherals
 
             [[nodiscard]] bool DataUpdated() const;
             [[nodiscard]] uint32_t GetValue();
-            void IrqHandler();
+            void Init();
+            void IrqHandler(const uint32_t activeChannel);
         };
     };
 };
