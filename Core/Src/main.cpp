@@ -57,14 +57,14 @@ int main()
                            , distanceMeasurementTrigger
                            , HAL::SoftwareTimer{ 50 }};
     Device::LM35 lm35{ adc1 };
-    hc_sr04.Trigger();
 
     while (true)
     {
         adcValue = adc1.Read();
         temp = lm35.ReadTempC();
         
-        distance = hc_sr04.GetDistance(temp);
+        if (const auto distanceOpt = hc_sr04.GetDistance(temp))
+            distance = distanceOpt.value();
 
         if (printingTimer.IsExpired())
         {

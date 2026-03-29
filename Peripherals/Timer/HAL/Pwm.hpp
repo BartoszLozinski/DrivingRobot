@@ -35,6 +35,9 @@ namespace Peripherals
             ~Pwm() = default;
 
             Pwm(TIM_HandleTypeDef& timer_, const uint32_t channel_);
+
+            [[nodiscard]] uint16_t GetCounter() const;
+            [[nodiscard]] uint16_t GetMaxCounter() const;
         };
     };
 }

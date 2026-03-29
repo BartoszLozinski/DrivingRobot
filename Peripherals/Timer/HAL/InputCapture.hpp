@@ -27,6 +27,7 @@ namespace Peripherals
             InputCapture& operator=(InputCapture&&) = delete;
 
             explicit InputCapture(TIM_HandleTypeDef& timer_, const uint32_t channel_);
+            uint32_t GetMaxCounter() const;
         };
     };
 };

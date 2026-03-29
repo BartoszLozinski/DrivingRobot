@@ -25,5 +25,5 @@ public:
 
     [[nodiscard]] uint32_t Now() const { return static_cast<const Implementation*>(this)->Now_Impl(); }
     void Reset() { lastEnabled = Now(); }
-    [[nodiscard]] uint32_t TimeExpired() const { return Now() - lastEnabled; }
+    [[nodiscard]] uint32_t TimeElapsed() const { return Now() - lastEnabled; }
 };

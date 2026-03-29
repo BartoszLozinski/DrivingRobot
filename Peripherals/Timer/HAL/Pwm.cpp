@@ -17,6 +17,16 @@ namespace Peripherals
             return (timer.Instance->CR1 & TIM_CR1_OPM);
         }
 
+        [[nodiscard]] uint16_t Pwm::GetCounter() const
+        {
+            return __HAL_TIM_GET_COUNTER(&timer);
+        };
+
+        [[nodiscard]] uint16_t Pwm::GetMaxCounter() const
+        {
+            return __HAL_TIM_GET_AUTORELOAD(&timer);
+        }
+
         PwmState Pwm::GetState_Impl() const
         {
             return static_cast<PwmState>(HAL_TIM_PWM_GetState(&timer));

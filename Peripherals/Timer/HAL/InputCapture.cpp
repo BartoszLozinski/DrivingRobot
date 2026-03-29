@@ -15,6 +15,11 @@ namespace Peripherals
         {
             HAL_TIM_IC_Start(&timer, channel);
         };
+ 
+        uint32_t InputCapture::GetMaxCounter() const
+        {
+            return __HAL_TIM_GET_AUTORELOAD(&timer);
+        }
 
         uint32_t InputCapture::Read_Impl()
         {
