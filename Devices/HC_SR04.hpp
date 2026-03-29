@@ -79,27 +79,14 @@ namespace Device
         {
         };
 
-        // One Pulse Mode trigger
         void Trigger()
         {
-            /*
-            trigger.Start();
-            triggerTimer.Reset();
-            */
-
             // Optional trigger that has a some overhead =/
             trigger.ResetCounter();
             trigger.Start();
             while (trigger.GetCounter() < trigger.GetMaxCounter())
             {};//potentially add timeout
             trigger.Stop();
-
-
-            
-            /*
-            if (trigger.GetState() == Peripherals::PwmState::READY)
-                trigger.Start();
-            */
         }
 
         std::optional<float> GetDistance(const float tempC = 20.f)
@@ -107,10 +94,14 @@ namespace Device
             switch (state)
             {
             case State::Idle:
-                Trigger();
-                distanceMeasurementTimer.Reset();
-                state = State::WaitingForRisingEdge;
+                if (distanceMeasurementTimer.IsExpired())
+                {
+                    Trigger();
+                    distanceMeasurementTimer.Reset();
+                    state = State::WaitingForRisingEdge;
+                }
                 break;
+
             case State::WaitingForRisingEdge:
                 if (distanceMeasurementTimer.IsExpired())
                 {
@@ -147,34 +138,5 @@ namespace Device
 
             return std::nullopt;
         };
-
-        /*
-        // return distance in [cm]
-        std::optional<float> GetDistance(const float tempC = 20.f)
-        {
-            
-            if (const auto readValue = echoRisingEdge.Read(); !startCaptured && readValue != 0)
-            {
-                startCaptured = true;
-                start = readValue;
-            }
-            if (const auto readValue = echoFallingEdge.Read(); !stopCaptured && readValue != 0)
-            {
-                stopCaptured = true;
-                stop = readValue;
-            }
-            if (startCaptured && stopCaptured)
-            {
-                startCaptured = false;
-                stopCaptured = false;
-                const auto deltaTime = (stop >= start) ? (stop - start) : (echoRisingEdge.GetMaxCounter() - start + stop + 1); // handle timer overflow
-
-                return deltaTime * (CalculateAirSoundVelocity(tempC) / (2 * us_in_s)) * 100;
-            }
-
-            return std::nullopt;
-        }
-        */
-
     };
 };
