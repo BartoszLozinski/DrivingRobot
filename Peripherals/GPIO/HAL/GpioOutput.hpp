@@ -13,6 +13,7 @@ namespace Peripherals
     {
         class GpioOutput : public IGpioOutput<GpioOutput>
         {
+        friend IGpioOutput<GpioOutput>;
         private:
             void Set_Impl();
             void Clear_Impl();

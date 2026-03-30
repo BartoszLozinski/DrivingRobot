@@ -1,4 +1,4 @@
-set(target_name GpioHAL)
+set(target_name Gpio_HAL)
 
 set(${target_name}_src  GpioOutput.cpp
 )
