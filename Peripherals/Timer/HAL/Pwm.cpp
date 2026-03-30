@@ -8,21 +8,14 @@ namespace Peripherals
         Pwm::Pwm(TIM_HandleTypeDef& timer_, const uint32_t channel_)
             : timer(timer_)
             , channel(channel_)
-        {
-            //cube initialized
-        };
+        {}; ///cube initialized
 
-        bool Pwm::IsOnePulseEnabled() const
-        {
-            return (timer.Instance->CR1 & TIM_CR1_OPM);
-        }
-
-        [[nodiscard]] uint16_t Pwm::GetCounter() const
+        uint16_t Pwm::GetCounter_Impl() const
         {
             return __HAL_TIM_GET_COUNTER(&timer);
         };
 
-        [[nodiscard]] uint16_t Pwm::GetMaxCounter() const
+        uint16_t Pwm::GetMaxCounter_Impl() const
         {
             return __HAL_TIM_GET_AUTORELOAD(&timer);
         }

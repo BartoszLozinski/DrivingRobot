@@ -81,7 +81,6 @@ namespace Device
 
         void Trigger()
         {
-            // Optional trigger that has a some overhead =/
             trigger.ResetCounter();
             trigger.Start();
             while (trigger.GetCounter() < trigger.GetMaxCounter())
@@ -122,6 +121,7 @@ namespace Device
                     state = State::Idle;
                     break;
                 }
+                
                 if (const auto readValue = echoFallingEdge.Read(); readValue != 0)
                 {
                     stop = readValue;

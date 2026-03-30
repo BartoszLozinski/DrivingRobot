@@ -18,13 +18,13 @@ namespace Peripherals
             TIM_HandleTypeDef& timer;
             uint32_t channel = 0;
 
+            [[nodiscard]] uint16_t GetCounter_Impl() const;
+            [[nodiscard]] uint16_t GetMaxCounter_Impl() const;
+            [[nodiscard]] PwmState GetState_Impl() const;
+            void ResetCounter_Impl();
             void Start_Impl();
             void Stop_Impl();
             void SetPulse_Impl(const uint32_t pulse);
-            PwmState GetState_Impl() const;
-            void ResetCounter_Impl();
-
-            [[nodiscard]] bool IsOnePulseEnabled() const;
             
         public:
             Pwm() = delete;
@@ -35,9 +35,6 @@ namespace Peripherals
             ~Pwm() = default;
 
             Pwm(TIM_HandleTypeDef& timer_, const uint32_t channel_);
-
-            [[nodiscard]] uint16_t GetCounter() const;
-            [[nodiscard]] uint16_t GetMaxCounter() const;
         };
     };
 }
