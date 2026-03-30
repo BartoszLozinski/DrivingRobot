@@ -45,7 +45,6 @@ int main()
     Peripherals::HAL::InputCapture timer2Channel2Falling{ htim2, TIM_CHANNEL_2 }; //PA0
     Peripherals::HAL::Pwm distanceMeasurementTrigger{ htim3, TIM_CHANNEL_1 }; //PC6
 
-    HAL_Delay(1000);
     float temp = 0.0f;
     float distance = 0.0f;
     uint32_t adcValue = 0;
