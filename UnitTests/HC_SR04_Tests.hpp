@@ -48,20 +48,25 @@ public:
     {
         distanceMeasurementTimer = timer;
     }
-};  
+};
 
-TEST(HCSR04Tests, GetDistanceTestReturnedValueWithoutTimeout)
+struct HCSR04_Fixture : public ::testing::Test
 {
     FakeInputCapture rising;
     FakeInputCapture falling;
     FakePwm trigger;
     FakeTimer timer{ 20 };
-    rising.value = 1000; //us
-    falling.value = 2000; //us
     const float tempC = 20.f;
     static constexpr unsigned us_in_s = 1'000'000;
     static constexpr unsigned cm_in_m = 100;
-    Device::HC_SR04 hc_sr04{ rising, falling, trigger, timer };
+
+    HC_SR04Mock hc_sr04{ rising, falling, trigger, timer };
+
+    void SetUp() override;
+};
+
+TEST_F(HCSR04_Fixture, GetDistanceTestReturnedValueWithoutTimeout)
+{
     const float expectedDistance = (falling.value - rising.value) * ( 331.8f + 0.6f * tempC ) / (2 * us_in_s) * cm_in_m;
     std::optional<float> distance = std::nullopt;
 
@@ -77,16 +82,8 @@ TEST(HCSR04Tests, GetDistanceTestReturnedValueWithoutTimeout)
     ASSERT_NEAR(distance.value(), expectedDistance, 0.01f);
 };
 
-TEST(HCSR04Tests, GetDistanceTestTimedOut)
+TEST_F(HCSR04_Fixture, GetDistanceTestTimedOut)
 {
-    FakeInputCapture rising;
-    FakeInputCapture falling;
-    FakePwm trigger;
-    FakeTimer timer{ 20 };
-    rising.value = 1000; //us
-    falling.value = 2000; //us
-    const float tempC = 20.f;
-    HC_SR04Mock hc_sr04{ rising, falling, trigger, timer };
     std::optional<float> distance = std::nullopt;
 
     for(std::size_t i = 0; i < 3; i++)
@@ -103,3 +100,8 @@ TEST(HCSR04Tests, GetDistanceTestTimedOut)
     ASSERT_FALSE(distance.has_value());
 };
 
+void HCSR04_Fixture::SetUp()
+{
+    rising.value = 1000; //us
+    falling.value = 2000; //us
+}
