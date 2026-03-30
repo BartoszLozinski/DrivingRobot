@@ -37,7 +37,7 @@ namespace Device
     template<InputCaptureConcept InputCapture_T, PwmConcept Pwm_T, SoftwareTimerConcept SoftwareTimer_T>
     class HC_SR04
     {
-    private:
+    protected:
 
         enum class State
         {

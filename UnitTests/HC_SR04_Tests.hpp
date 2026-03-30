@@ -33,11 +33,24 @@ public:
     FakeTimer(const uint32_t delay_)
         : TimerBase<FakeTimer>(delay_)
     {};
-
+    void SetFakeNow(const uint32_t fakeNow_) { fakeNow = fakeNow_; }
     uint32_t Now_Impl() const { return fakeNow; }
 };
 
-TEST(HCSR04Tests, GetDistanceTestTriggerTimerExpired)
+class HC_SR04Mock : public Device::HC_SR04<FakeInputCapture, FakePwm, FakeTimer>
+{
+public:
+    HC_SR04Mock(FakeInputCapture& rising, FakeInputCapture& falling, FakePwm& trigger, FakeTimer& timer)
+        : Device::HC_SR04<FakeInputCapture, FakePwm, FakeTimer>(rising, falling, trigger, timer)
+    {};
+
+    void SetFakeTimer(const FakeTimer& timer)
+    {
+        distanceMeasurementTimer = timer;
+    }
+};  
+
+TEST(HCSR04Tests, GetDistanceTestReturnedValueWithoutTimeout)
 {
     FakeInputCapture rising;
     FakeInputCapture falling;
@@ -63,3 +76,30 @@ TEST(HCSR04Tests, GetDistanceTestTriggerTimerExpired)
     ASSERT_GE(falling.readCounter, 1);
     ASSERT_NEAR(distance.value(), expectedDistance, 0.01f);
 };
+
+TEST(HCSR04Tests, GetDistanceTestTimedOut)
+{
+    FakeInputCapture rising;
+    FakeInputCapture falling;
+    FakePwm trigger;
+    FakeTimer timer{ 20 };
+    rising.value = 1000; //us
+    falling.value = 2000; //us
+    const float tempC = 20.f;
+    HC_SR04Mock hc_sr04{ rising, falling, trigger, timer };
+    std::optional<float> distance = std::nullopt;
+
+    for(std::size_t i = 0; i < 3; i++)
+    {
+        if (i > 0)
+            hc_sr04.SetFakeTimer(FakeTimer{ 1 }); // reset timer to simulate timeout
+        distance = hc_sr04.GetDistance(tempC);
+    }
+
+    ASSERT_TRUE(trigger.startHasRun);
+    ASSERT_TRUE(trigger.stopHasRun);
+    ASSERT_GE(trigger.counter, 20);
+    ASSERT_TRUE(trigger.resetCounterHasRun);
+    ASSERT_FALSE(distance.has_value());
+};
+
