@@ -20,6 +20,7 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
         # Gpio_HAL
         ADC_HAL
         Timer
+        UART_HAL
 )
 
 target_compile_definitions(${CMAKE_PROJECT_NAME}

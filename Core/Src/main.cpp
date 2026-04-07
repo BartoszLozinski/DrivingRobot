@@ -7,6 +7,7 @@
 #include "../../Peripherals/Timer/HAL/SoftwareTimer.hpp"
 #include "../../Peripherals/Timer/HAL/InputCapture.hpp"
 #include "../../Peripherals/Timer/HAL/Pwm.hpp"
+#include "../../Peripherals/UART/HAL/Uart.hpp"
 
 #include "../../Devices/HC_SR04.hpp"
 #include "../../Devices/LM35.hpp"
@@ -44,6 +45,7 @@ int main()
     Peripherals::HAL::InputCapture timer2Channel1Rising{ htim2, TIM_CHANNEL_1 }; //PA0
     Peripherals::HAL::InputCapture timer2Channel2Falling{ htim2, TIM_CHANNEL_2 }; //PA0
     Peripherals::HAL::Pwm distanceMeasurementTrigger{ htim3, TIM_CHANNEL_1 }; //PC6
+    Peripherals::HAL::Uart uart2{ huart2 };
 
     float temp = 0.0f;
     float distance = 0.0f;
@@ -69,9 +71,9 @@ int main()
         {
             printingTimer.Reset();
             snprintf(stringBuffer, sizeof(stringBuffer), "Distance: %.1f [cm]\r\n", distance);
-            HAL_UART_Transmit(&huart2, reinterpret_cast<uint8_t*>(stringBuffer), strlen(stringBuffer), HAL_MAX_DELAY);
+            uart2.Transmit(reinterpret_cast<const uint8_t*>(stringBuffer), strlen(stringBuffer));
             snprintf(stringBuffer, sizeof(stringBuffer), "ADC: %lu[-], Temp: %.1f [C]\r\n", adcValue, temp);
-            HAL_UART_Transmit(&huart2, reinterpret_cast<uint8_t*>(stringBuffer), strlen(stringBuffer), HAL_MAX_DELAY);
+            uart2.Transmit(reinterpret_cast<const uint8_t*>(stringBuffer), strlen(stringBuffer));
         }
     }
 }
