@@ -4,7 +4,9 @@ set(${target_name}_src  GpioOutput.cpp
 )
 
 set(${target_name}_hpp  ../IGpioOutput.hpp
+                        ../IGpioInput.hpp
                         GpioOutput.hpp
+                        GpioInput.hpp
 )
 
 add_library(${target_name} STATIC)
