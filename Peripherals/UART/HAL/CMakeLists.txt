@@ -1,24 +1,23 @@
 set(target_name UART_HAL)
 
 set(${target_name}_hpp  ../IUart.hpp
+                        ../LineParser.hpp
                         Uart.hpp
 )
 
-add_library(${target_name} STATIC)
+add_library(${target_name} INTERFACE)
 
 cmake_path(GET  CMAKE_CURRENT_SOURCE_DIR    PARENT_PATH     PERIHPERALS_DIR)
 
 target_sources(${target_name}
-    PRIVATE
-        ${CMAKE_SOURCE_DIR}
-    PUBLIC
+    INTERFACE
         FILE_SET HEADERS
         BASE_DIRS ${PERIHPERALS_DIR}
         FILES ${${target_name}_hpp}
 )
 
-target_link_libraries(${target_name}    PRIVATE     STM32_HAL)
-target_compile_options(${target_name}   PRIVATE     -Wall
+target_link_libraries(${target_name}    INTERFACE     STM32_HAL)
+target_compile_options(${target_name}   INTERFACE     -Wall
                                                     -Werror
                                                     -Wextra
                                                     -Wpedantic
@@ -35,7 +34,7 @@ target_compile_options(${target_name}   PRIVATE     -Wall
 )
 
 target_compile_definitions(${target_name}
-    PRIVATE
+    INTERFACE
         STM32L476xx
         USE_HAL_DRIVER
 )

@@ -1,11 +1,13 @@
 #pragma once
 
-#include <concept>
+#include <concepts>
+#include <optional>
+#include <span>
 
 template<typename T>
 concept UartConcept = requires(T uart)
 {
-    { uart.Read() -> std::optional<uint8_t> };
+    { uart.Read() } -> std::same_as<std::optional<uint8_t>>;
 };
 
 namespace UcCommunication
@@ -17,10 +19,12 @@ namespace UcCommunication
         UartT& uart;
         std::array<uint8_t, BufferSize> lineBuffer{};
         std::size_t lineIndex{ 0 };
+        volatile bool lastWasCarriageReturn{ false };
 
         void ResetIndex()
         {
             lineIndex = 0;
+            lastWasCarriageReturn = false;
         }
 
     public:
@@ -36,21 +40,34 @@ namespace UcCommunication
 
                 if (byte == '\n')
                 {
+                    if (lastWasCarriageReturn)
+                    {
+                        lastWasCarriageReturn = false;
+                        continue;
+                    }
+
                     std::span<const uint8_t> line{ lineBuffer.data(), lineIndex };
                     ResetIndex();
                     return line;
                 }
                 
                 if (byte == '\r')
-                    continue;
-                
+                {
+                    lastWasCarriageReturn = true;
+                    std::span<const uint8_t> line{ lineBuffer.data(), lineIndex };
+                    ResetIndex();
+                    return line;
+                }
+
+                lastWasCarriageReturn = false;
+
                 if (lineIndex < BufferSize)
                     lineBuffer[lineIndex++] = byte;
                 else
                     ResetIndex();
             }
 
-            return std::nullopt; // No complete line available
+            return std::nullopt;
         }
     };
 }

@@ -26,7 +26,7 @@ namespace Peripherals
                 while (__HAL_UART_GET_FLAG(&huart, UART_FLAG_RXNE))
                 {
                     const uint8_t receivedByte = static_cast<uint8_t>(huart.Instance->RDR & 0xFF); // Read received byte
-                    if (!rxBuffer.Push(receivedByte))
+                    if (!this->rxBuffer.Push(receivedByte))
                         ++overflowCount;
                 }
             }
@@ -44,8 +44,7 @@ namespace Peripherals
             Uart& operator=(Uart&&) = delete;
             ~Uart() = default;
             explicit Uart(UART_HandleTypeDef& huart_)
-                : IUart<Uart<BufferSize>, BufferSize>
-                , huart(huart_)
+                : huart(huart_)
             {};
 
             // TO DO:
