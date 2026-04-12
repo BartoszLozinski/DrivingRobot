@@ -18,7 +18,7 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
     PRIVATE
         STM32_HAL
         # Gpio_HAL
-        ADC_HAL
+        # ADC_HAL
         Timer
         UART_HAL
 )
