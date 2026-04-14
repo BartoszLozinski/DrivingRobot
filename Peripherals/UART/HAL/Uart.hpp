@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IUart.hpp"
+#include "Utils/RingBuffer.hpp"
 
 extern "C"
 {
@@ -13,12 +14,13 @@ namespace Peripherals
     {
 
         template<std::size_t BufferSize = 64>
-        class Uart : public IUart<Uart<BufferSize>, BufferSize>
+        class Uart : public IUart<Uart<BufferSize>>
         {
-        friend IUart<Uart<BufferSize>, BufferSize>;
+        friend IUart<Uart<BufferSize>>;
         private:
             UART_HandleTypeDef& huart;
             std::size_t overflowCount{ 0 };
+            RingBuffer<BufferSize> rxBuffer{};
 
             void Poll_Impl()
             {
@@ -29,14 +31,11 @@ namespace Peripherals
                     if (!this->rxBuffer.Push(byte))
                         ++overflowCount;
                 }
+            }
 
-                //check RXNE flag
-                /*while (__HAL_UART_GET_FLAG(&huart, UART_FLAG_RXNE))
-                {
-                    const uint8_t receivedByte = static_cast<uint8_t>(huart.Instance->RDR & 0xFF); // Read received byte
-                    if (!this->rxBuffer.Push(receivedByte))
-                        ++overflowCount;
-                }*/
+            std::optional<uint8_t> Read_Impl()
+            {
+                return rxBuffer.Pop();
             }
 
             void Transmit_Impl(const uint8_t* data, size_t size)
