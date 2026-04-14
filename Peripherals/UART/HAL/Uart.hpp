@@ -12,7 +12,6 @@ namespace Peripherals
 {
     namespace HAL
     {
-
         template<std::size_t BufferSize = 64>
         class Uart : public IUart<Uart<BufferSize>>
         {
@@ -56,7 +55,7 @@ namespace Peripherals
 
             // TO DO:
             // - Interrupt version
-            // - Line parser
+            // - Line parser - done
         };
     }
 }

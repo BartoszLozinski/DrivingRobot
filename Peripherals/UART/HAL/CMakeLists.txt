@@ -2,6 +2,7 @@ set(target_name UART_HAL)
 
 set(${target_name}_hpp  ../IUart.hpp
                         ../LineParser.hpp
+                        ../Utils/RingBuffer.hpp
                         Uart.hpp
 )
 
