@@ -14,6 +14,7 @@
 #include "../../Devices/LM35.hpp"
 
 TIM_HandleTypeDef htim2;
+UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
 TIM_HandleTypeDef htim3;
 
@@ -23,6 +24,7 @@ static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_TIM3_Init(void);
+static void MX_USART1_UART_Init(void);
 
 int main()
 {
@@ -35,12 +37,14 @@ int main()
     MX_USART2_UART_Init();
     MX_TIM2_Init();
     MX_TIM3_Init();
+    MX_USART1_UART_Init();
 
     
     Peripherals::HAL::InputCapture timer2Channel1Rising{ htim2, TIM_CHANNEL_1 }; //PA0
     Peripherals::HAL::InputCapture timer2Channel2Falling{ htim2, TIM_CHANNEL_2 }; //PA0
     Peripherals::HAL::Pwm distanceMeasurementTrigger{ htim3, TIM_CHANNEL_1 }; //PC6
     Peripherals::HAL::Uart uart2{ huart2 };
+    Peripherals::HAL::Uart btHC06Uart{ huart1 }; //PA9 (TX), PA10 (RX)
 
     float distance = 0.0f;
     char stringBuffer[64];
@@ -52,11 +56,13 @@ int main()
                            , HAL::SoftwareTimer{ 50 }};
 
     HAL::SoftwareTimer uartResetTimer{ 2000 };
+    HAL::SoftwareTimer btUartResetTimer{ 500 };
     UcCommunication::LineParser<Peripherals::HAL::Uart<64>> lineParser{ uart2 };
 
     while (true)
     {
         // UART Test
+        /*
         uart2.Poll();
         if (auto lineOpt = lineParser.ReadLine())
         {
@@ -81,6 +87,22 @@ int main()
             std::string_view resetMsg = "UART Reset\r\n";
             uart2.Transmit(reinterpret_cast<const uint8_t*>(resetMsg.data()), resetMsg.size());
         }
+        */
+
+        //UART 1 Test - Bluetooth HC-06
+
+        if (btUartResetTimer.IsExpired())
+        {
+            //connection at linux
+            // sudo rfcomm connect 0 <Address>
+            // on second terminal window: screen /dev/rfcomm0 9600
+            btUartResetTimer.Reset();
+            std::string_view resetMsg = "BT UART Reset\r\n";
+            btHC06Uart.Transmit(reinterpret_cast<const uint8_t*>(resetMsg.data()), resetMsg.size());
+            HAL_UART_Transmit(&huart1, (uint8_t*)"test\r\n", 6, HAL_MAX_DELAY);
+        }
+        
+
         // End of UART Test
         
         if (const auto distanceOpt = hc_sr04.GetDistance())
@@ -193,6 +215,35 @@ static void MX_TIM2_Init(void)
   /* USER CODE END TIM2_Init 2 */
 }
 
+static void MX_USART1_UART_Init(void)
+{
+
+  /* USER CODE BEGIN USART1_Init 0 */
+
+  /* USER CODE END USART1_Init 0 */
+
+  /* USER CODE BEGIN USART1_Init 1 */
+
+  /* USER CODE END USART1_Init 1 */
+  huart1.Instance = USART1;
+  huart1.Init.BaudRate = 9600;
+  huart1.Init.WordLength = UART_WORDLENGTH_8B;
+  huart1.Init.StopBits = UART_STOPBITS_1;
+  huart1.Init.Parity = UART_PARITY_NONE;
+  huart1.Init.Mode = UART_MODE_TX_RX;
+  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart1.Init.OverSampling = UART_OVERSAMPLING_16;
+  huart1.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
+  huart1.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
+  if (HAL_UART_Init(&huart1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN USART1_Init 2 */
+
+  /* USER CODE END USART1_Init 2 */
+
+}
 
 static void MX_USART2_UART_Init(void)
 {
