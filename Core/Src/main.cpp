@@ -56,7 +56,9 @@ int main()
                            , HAL::SoftwareTimer{ 50 }};
 
     HAL::SoftwareTimer uartResetTimer{ 2000 };
-    HAL::SoftwareTimer btUartResetTimer{ 1000 };
+    HAL::SoftwareTimer uart2PollTimer{ 1 };
+    HAL::SoftwareTimer btUartResetTimer{ 2000 };
+    HAL::SoftwareTimer btUartPollTimer{ 1 };
     UcCommunication::LineParser<Peripherals::HAL::Uart<64>> lineParser{ uart2 };
     UcCommunication::LineParser<Peripherals::HAL::Uart<64>> btLineParser{ btHC06Uart };
 
@@ -64,7 +66,12 @@ int main()
     {
         // UART Test
         
-        uart2.Poll();
+        if (uart2PollTimer.IsExpired())
+        {
+            uart2PollTimer.Reset();
+            uart2.Poll();
+        }
+
         if (auto lineOpt = lineParser.ReadLine())
         {
             const auto line = *lineOpt;
@@ -95,7 +102,12 @@ int main()
         // sudo rfcomm connect 0 <Address>
         // on second terminal window: screen /dev/rfcomm0 9600
         
-        btHC06Uart.Poll();
+        if (btUartPollTimer.IsExpired())
+        {
+            btUartPollTimer.Reset();
+            btHC06Uart.Poll();
+        }
+
         if (auto lineOpt = btLineParser.ReadLine())
         {
             const auto line = *lineOpt;
