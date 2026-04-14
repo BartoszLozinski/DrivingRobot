@@ -22,13 +22,21 @@ namespace Peripherals
 
             void Poll_Impl()
             {
+                uint8_t byte;
+
+                while (HAL_UART_Receive(&huart, &byte, 1, 0) == HAL_OK)
+                {
+                    if (!this->rxBuffer.Push(byte))
+                        ++overflowCount;
+                }
+
                 //check RXNE flag
-                while (__HAL_UART_GET_FLAG(&huart, UART_FLAG_RXNE))
+                /*while (__HAL_UART_GET_FLAG(&huart, UART_FLAG_RXNE))
                 {
                     const uint8_t receivedByte = static_cast<uint8_t>(huart.Instance->RDR & 0xFF); // Read received byte
                     if (!this->rxBuffer.Push(receivedByte))
                         ++overflowCount;
-                }
+                }*/
             }
 
             void Transmit_Impl(const uint8_t* data, size_t size)

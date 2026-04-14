@@ -56,13 +56,14 @@ int main()
                            , HAL::SoftwareTimer{ 50 }};
 
     HAL::SoftwareTimer uartResetTimer{ 2000 };
-    HAL::SoftwareTimer btUartResetTimer{ 500 };
+    HAL::SoftwareTimer btUartResetTimer{ 1000 };
     UcCommunication::LineParser<Peripherals::HAL::Uart<64>> lineParser{ uart2 };
+    UcCommunication::LineParser<Peripherals::HAL::Uart<64>> btLineParser{ btHC06Uart };
 
     while (true)
     {
         // UART Test
-        /*
+        
         uart2.Poll();
         if (auto lineOpt = lineParser.ReadLine())
         {
@@ -87,19 +88,29 @@ int main()
             std::string_view resetMsg = "UART Reset\r\n";
             uart2.Transmit(reinterpret_cast<const uint8_t*>(resetMsg.data()), resetMsg.size());
         }
-        */
+        
 
-        //UART 1 Test - Bluetooth HC-06
-
-        if (btUartResetTimer.IsExpired())
+        // UART 1 Test - Bluetooth HC-06
+        // connection at linux
+        // sudo rfcomm connect 0 <Address>
+        // on second terminal window: screen /dev/rfcomm0 9600
+        
+        btHC06Uart.Poll();
+        if (auto lineOpt = btLineParser.ReadLine())
         {
-            //connection at linux
-            // sudo rfcomm connect 0 <Address>
-            // on second terminal window: screen /dev/rfcomm0 9600
+            const auto line = *lineOpt;
+            const char* prefix = "RX: ";
+            btHC06Uart.Transmit(reinterpret_cast<const uint8_t*>(prefix), strlen(prefix));
+            btHC06Uart.Transmit(reinterpret_cast<const uint8_t*>(line.data()), line.size());
+            btHC06Uart.Transmit(reinterpret_cast<const uint8_t*>("\r\n"), 2);
+        }
+        
+        
+        if (btUartResetTimer.IsExpired())
+        {  
             btUartResetTimer.Reset();
             std::string_view resetMsg = "BT UART Reset\r\n";
             btHC06Uart.Transmit(reinterpret_cast<const uint8_t*>(resetMsg.data()), resetMsg.size());
-            HAL_UART_Transmit(&huart1, (uint8_t*)"test\r\n", 6, HAL_MAX_DELAY);
         }
         
 
