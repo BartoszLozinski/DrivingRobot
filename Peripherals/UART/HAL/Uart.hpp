@@ -21,17 +21,6 @@ namespace Peripherals
             std::size_t overflowCount{ 0 };
             RingBuffer<BufferSize> rxBuffer{};
 
-            void Poll_Impl()
-            {
-                uint8_t byte;
-
-                while (HAL_UART_Receive(&huart, &byte, 1, 0) == HAL_OK)
-                {
-                    if (!this->rxBuffer.Push(byte))
-                        ++overflowCount;
-                }
-            }
-
             std::optional<uint8_t> Read_Impl()
             {
                 return rxBuffer.Pop();
@@ -53,9 +42,16 @@ namespace Peripherals
                 : huart(huart_)
             {};
 
-            // TO DO:
-            // - Interrupt version
-            // - Line parser - done
+            void Poll()
+            {
+                uint8_t byte;
+
+                while (HAL_UART_Receive(&huart, &byte, 1, 0) == HAL_OK)
+                {
+                    if (!this->rxBuffer.Push(byte))
+                        ++overflowCount;
+                }
+            }
         };
     }
 }

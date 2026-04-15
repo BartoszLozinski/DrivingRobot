@@ -8,6 +8,7 @@
 #include "../../Peripherals/Timer/HAL/InputCapture.hpp"
 #include "../../Peripherals/Timer/HAL/Pwm.hpp"
 #include "../../Peripherals/UART/HAL/Uart.hpp"
+#include "../../Peripherals/UART/HAL/UartIT.hpp"
 #include "../../Peripherals/UART/LineParser.hpp"
 
 #include "../../Devices/HC_SR04.hpp"
@@ -26,6 +27,8 @@ static void MX_TIM2_Init(void);
 static void MX_TIM3_Init(void);
 static void MX_USART1_UART_Init(void);
 
+Peripherals::HAL::UartIT uart2{ huart2 };
+
 int main()
 {
     /* MCU Configuration--------------------------------------------------------*/
@@ -38,12 +41,13 @@ int main()
     MX_TIM2_Init();
     MX_TIM3_Init();
     MX_USART1_UART_Init();
-
+    
+    uart2.StartReceiveIT();
     
     Peripherals::HAL::InputCapture timer2Channel1Rising{ htim2, TIM_CHANNEL_1 }; //PA0
     Peripherals::HAL::InputCapture timer2Channel2Falling{ htim2, TIM_CHANNEL_2 }; //PA0
     Peripherals::HAL::Pwm distanceMeasurementTrigger{ htim3, TIM_CHANNEL_1 }; //PC6
-    Peripherals::HAL::Uart uart2{ huart2 };
+
     Peripherals::HAL::Uart btHC06Uart{ huart1 }; //PA9 (TX), PA10 (RX)
 
     float distance = 0.0f;
@@ -59,13 +63,13 @@ int main()
     HAL::SoftwareTimer uart2PollTimer{ 1 };
     HAL::SoftwareTimer btUartResetTimer{ 2000 };
     HAL::SoftwareTimer btUartPollTimer{ 1 };
-    UcCommunication::LineParser<Peripherals::HAL::Uart<64>> lineParser{ uart2 };
-    UcCommunication::LineParser<Peripherals::HAL::Uart<64>> btLineParser{ btHC06Uart };
+    UcCommunication::LineParser lineParser{ uart2 };
+    UcCommunication::LineParser btLineParser{ btHC06Uart };
 
     while (true)
     {
         // UART Test
-        
+        /*
         if (uart2PollTimer.IsExpired())
         {
             uart2PollTimer.Reset();
@@ -95,6 +99,7 @@ int main()
             std::string_view resetMsg = "UART Reset\r\n";
             uart2.Transmit(reinterpret_cast<const uint8_t*>(resetMsg.data()), resetMsg.size());
         }
+        */
         
 
         // UART 1 Test - Bluetooth HC-06
@@ -125,6 +130,14 @@ int main()
             btHC06Uart.Transmit(reinterpret_cast<const uint8_t*>(resetMsg.data()), resetMsg.size());
         }
         
+        if (auto lineOpt = lineParser.ReadLine())
+        {
+            const auto line = *lineOpt;
+            const char* prefix = "RX Uart2IT: ";
+            uart2.Transmit(reinterpret_cast<const uint8_t*>(prefix), strlen(prefix));
+            uart2.Transmit(reinterpret_cast<const uint8_t*>(line.data()), line.size());
+            uart2.Transmit(reinterpret_cast<const uint8_t*>("\r\n"), 2);
+        }
 
         // End of UART Test
         
@@ -368,6 +381,15 @@ void Error_Handler(void)
     }
     /* USER CODE END Error_Handler_Debug */
 }
+
+extern "C" void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+    if (huart->Instance == USART2)
+    {
+        uart2.RxCpltCallback();
+    }
+}
+
 #ifdef USE_FULL_ASSERT
 /**
   * @brief  Reports the name of the source file and the source line number

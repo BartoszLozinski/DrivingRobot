@@ -4,6 +4,7 @@ set(${target_name}_hpp  ../IUart.hpp
                         ../LineParser.hpp
                         ../Utils/RingBuffer.hpp
                         Uart.hpp
+                        UartIT.hpp
 )
 
 add_library(${target_name} INTERFACE)

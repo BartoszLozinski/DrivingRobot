@@ -15,11 +15,6 @@ namespace Peripherals
         IUart& operator=(const IUart&) = delete;
         IUart& operator=(IUart&&) = delete;
         ~IUart() = default;
-
-        void Poll()
-        {
-            static_cast<Implementation*>(this)->Poll_Impl();
-        }
         
         std::optional<uint8_t> Read()
         {
