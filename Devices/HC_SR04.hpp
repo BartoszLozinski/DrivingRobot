@@ -140,3 +140,38 @@ namespace Device
         };
     };
 };
+
+// Usage example to paste in main
+
+/*
+    TIM_HandleTypeDef htim2;
+    TIM_HandleTypeDef htim3; //and rest of generated code
+
+    int main()
+    {
+        float distance = 0.0f;
+        char stringBuffer[64];
+        Peripherals::HAL::Pwm distanceMeasurementTrigger{ htim3, TIM_CHANNEL_1 }; //PC6
+        Peripherals::HAL::InputCapture timer2Channel1Rising{ htim2, TIM_CHANNEL_1 }; //PA0
+        Peripherals::HAL::InputCapture timer2Channel2Falling{ htim2, TIM_CHANNEL_2 }; //PA0
+        HAL::SoftwareTimer printingTimer{ 500 };
+        
+        Device::HC_SR04 hc_sr04{ timer2Channel1Rising
+                           , timer2Channel2Falling
+                           , distanceMeasurementTrigger
+                           , HAL::SoftwareTimer{ 50 }};
+
+        while (true)
+        {
+            if (const auto distanceOpt = hc_sr04.GetDistance())
+                distance = distanceOpt.value();
+
+            if (printingTimer.IsExpired())
+            {
+                printingTimer.Reset();
+                snprintf(stringBuffer, sizeof(stringBuffer), "Distance: %.1f [cm]\r\n", distance);
+                uart2.Transmit(reinterpret_cast<const uint8_t*>(stringBuffer), strlen(stringBuffer));
+            }
+        }
+    }
+*/
