@@ -14,7 +14,7 @@ namespace Peripherals
             static constexpr uint16_t memoryAddressSize = 1;
 
             return HAL_I2C_Mem_Write(&i2cHandle
-                                    , deviceAddress
+                                    , deviceAddress << addressOffset
                                     , memoryAddress
                                     , memoryAddressSize
                                     , buffer.data()
@@ -29,7 +29,7 @@ namespace Peripherals
 
             static constexpr uint16_t memoryAddressSize = 1;
             return HAL_I2C_Mem_Read( &i2cHandle
-                                                , deviceAddress
+                                                , deviceAddress << addressOffset
                                                 , memoryAddress
                                                 , memoryAddressSize
                                                 , buffer.data()

@@ -12,7 +12,7 @@ namespace Peripherals
                 return I2CResult::Busy;
 
             const bool success = HAL_I2C_Mem_Write_IT( &i2cHandle
-                                                    , deviceAddress
+                                                    , deviceAddress << addressOffset
                                                     , memoryAddress
                                                     , I2C_MEMADD_SIZE_8BIT
                                                     , buffer.data()
@@ -28,7 +28,7 @@ namespace Peripherals
                 return I2CResult::Busy;
 
             const bool success = HAL_I2C_Mem_Read_IT(&i2cHandle
-                                                    , deviceAddress
+                                                    , deviceAddress << addressOffset
                                                     , memoryAddress
                                                     , I2C_MEMADD_SIZE_8BIT
                                                     , buffer.data()

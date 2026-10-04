@@ -30,8 +30,6 @@ namespace Device
             Error,
         };
 
-        static constexpr uint8_t addressOffset = 1; // STM32 HAL library uses 8-bit address, so we need to shift the 7-bit address by 1 to the left
-
         Peripherals::I2CBase_IT& i2c;
         State state = State::Idle;
         bool isAwake = false;

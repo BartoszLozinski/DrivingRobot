@@ -67,7 +67,7 @@ namespace Device
     {
         if (state == State::Idle)
         {
-            state = i2c.Read(static_cast<uint16_t>(RegisterAddresses::ADDR) << addressOffset
+            state = i2c.Read(static_cast<uint16_t>(RegisterAddresses::ADDR)
                             , reg
                             , std::span<uint8_t>(&readRegisterBuffer, sizeof(readRegisterBuffer))) == Peripherals::I2CResult::Success ? State::TransferScheduled : State::Error;
         }
@@ -94,7 +94,7 @@ namespace Device
 
     void ICM20948_Async::StartRead(const uint16_t reg, std::span<uint8_t>(buffer), const State successfulState)
     {
-        state = i2c.Read(static_cast<uint16_t>(RegisterAddresses::ADDR) << addressOffset
+        state = i2c.Read(static_cast<uint16_t>(RegisterAddresses::ADDR)
                         , reg
                         , buffer) == Peripherals::I2CResult::Success ? successfulState : State::Error;
     }
@@ -121,7 +121,7 @@ namespace Device
             static constexpr uint8_t SLEEP_MODE_BIT_MASK = 0x1 << 6; // 1 - sleep, 0 - wake up
             currentPwrMgmt1Reg &= ~SLEEP_MODE_BIT_MASK;
 
-            i2c.Write(static_cast<uint16_t>(RegisterAddresses::ADDR) << addressOffset
+            i2c.Write(static_cast<uint16_t>(RegisterAddresses::ADDR)
                     , static_cast<uint16_t>(RegisterAddresses::PWR_MGMT_1)
                     , std::span<uint8_t>(&currentPwrMgmt1Reg, sizeof(currentPwrMgmt1Reg)));
             break;

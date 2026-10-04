@@ -23,6 +23,8 @@ namespace Peripherals
 
     class I2CBase
     {
+    protected:
+        static constexpr uint8_t addressOffset = 1; // STM32 HAL library uses 8-bit address, so we need to shift the 7-bit address by 1 to the left
     public:
         virtual ~I2CBase() = default;
         virtual I2CResult Write(const uint16_t deviceAddress, const uint16_t memoryAddress, std::span<uint8_t> buffer) = 0;
