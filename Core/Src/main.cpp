@@ -60,7 +60,7 @@ int main()
         }
     }};
 
-    Task<RegisterLevel::SoftwareTimer> printTemperaturePressureTask{ 500, [&]()
+    Task<RegisterLevel::SoftwareTimer> printTemperaturePressureTask{ 1000, [&]()
     {
         char messageBuffer[48];
         snprintf(messageBuffer, sizeof(messageBuffer), "Temp: %.2f C, Pressure: %lu hPa\r\n", temperature, pressure);
@@ -120,63 +120,41 @@ int main()
             ledControlFunction();
         }
     }};
-/*
-    Task<RegisterLevel::SoftwareTimer> readICM20948WhoAmI{ 250, [&]()
+
+    std::optional<AccelerometerReading> accelerometer = std::nullopt;
+
+    Task<RegisterLevel::SoftwareTimer> readICM20948Accelerometer{ 10, [&]()
     {
         if (icm20948Async.IsAwake())
         {
-            if (const auto whoAmI = icm20948Async.ReadWhoAmI(); whoAmI)
-            {
-                char messageBuffer[20];
-                snprintf(messageBuffer, sizeof(messageBuffer), "Who Am I: 0x%02X\r\n", whoAmI.value());
-                uart2.Transmit(reinterpret_cast<const uint8_t*>(messageBuffer), strlen(messageBuffer));
-            }
+            if (const auto readValue = icm20948Async.ReadAccelerometer(); readValue)
+                accelerometer = readValue.value();
         }
         else
         {
             icm20948Async.WakeUp();
-            static constexpr uint8_t wakingUpMessage[] = "Waking up ICM-20948\r\n";
-            uart2.Transmit(reinterpret_cast<const uint8_t*>(wakingUpMessage), sizeof(wakingUpMessage) - 1);
-        }
-    }};
-*/
-
-    std::optional<float> accelerometerX = std::nullopt;
-
-    Task<RegisterLevel::SoftwareTimer> readICM20948AccelerometerX{ 10, [&]()
-    {
-        if (icm20948Async.IsAwake())
-        {
-            if (const auto readValue = icm20948Async.ReadAccelerometerX(); readValue)
-                accelerometerX = readValue.value();
-        }
-        else
-        {
-            icm20948Async.WakeUp();
-            static constexpr uint8_t wakingUpMessage[] = "Waking up ICM-20948\r\n";
-            uart2.Transmit(reinterpret_cast<const uint8_t*>(wakingUpMessage), sizeof(wakingUpMessage) - 1);
+            static constexpr char wakingUpMessage[] = "Waking up ICM-20948\r\n";
+            uart2.Transmit(reinterpret_cast<const uint8_t*>(wakingUpMessage), strlen(wakingUpMessage));
         }
     }};
 
-    Task<RegisterLevel::SoftwareTimer> printAccelerometerX{ 250, [&]()
+    Task<RegisterLevel::SoftwareTimer> printAccelerometer{ 500, [&]()
     {
-        if (accelerometerX)
+        if (accelerometer)
         {
-            char messageBuffer[20];
-            snprintf(messageBuffer, sizeof(messageBuffer), "Accel X: %.2f\r\n", accelerometerX.value());
+            const auto& value = accelerometer.value();
+            char messageBuffer[32];
+            snprintf(messageBuffer, sizeof(messageBuffer), "Accel: [%.2f, %.2f, %.2f]\r\n", value.x, value.y, value.z);
             uart2.Transmit(reinterpret_cast<const uint8_t*>(messageBuffer), strlen(messageBuffer));
         }
     }};
-
-
-
     
     Scheduler<Task<RegisterLevel::SoftwareTimer>, 6> scheduler{ { readLPS25HBSensorTask
                                                       , printTemperaturePressureTask
                                                       , ld2Task
                                                       , ledControllerTask
-                                                      , readICM20948AccelerometerX
-                                                      , printAccelerometerX } };
+                                                      , readICM20948Accelerometer
+                                                      , printAccelerometer } };
 
     // LPS25HB test
     uart1.ConfigureInterruptsPriority(IRQn_Type::USART1_IRQn, 1);

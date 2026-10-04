@@ -3,11 +3,19 @@
 #include "ICM20948Base.hpp"
 #include "Peripherals/I2C/I2CBase.hpp"
 
+struct AccelerometerReading
+{
+    float x;
+    float y;
+    float z;
+};
+
 namespace Device
 {
     class ICM20948_Async : public ICM20948Base
     {
-        using AccelerometerBuffer = std::array<uint8_t, 2>;
+        using AccelerometerDirectionBuffer = std::array<uint8_t, 2>;
+        using AccelerometerBuffer = std::array<uint8_t, 6>;
 
     private:
         enum class State
@@ -16,10 +24,12 @@ namespace Device
             TransferScheduled,
             WakeUpScheduled,
             RegisterReadyToRead,
-            RxAccelerometerXReadingHigh,
-            AccelerometerXReadyToReadHigh,
-            RxAccelerometerXReadingLow,
-            AccelerometerXReadyToReadLow,
+            RxAccelerometerReading,
+            AccelerometerReadyToRead,
+            RxAccelerometerXReadingHigh, // might be unnecessary
+            AccelerometerXReadyToReadHigh, // might be unnecessary
+            RxAccelerometerXReadingLow, // might be unnecessary
+            AccelerometerXReadyToReadLow, // might be unnecessary
             WakeUpCompleted,
             Error,
         };
@@ -33,7 +43,8 @@ namespace Device
         uint8_t currentPwrMgmt1Reg = 0x41; //default value after reset, device is in sleep mode (bit 7 = 1), auto selects best available clock source (bit 2:0 = 1-5)
         
         uint8_t readRegisterBuffer{};
-        AccelerometerBuffer rawAccelerometerXBuffer{};
+        AccelerometerDirectionBuffer rawAccelerometerXBuffer{};
+        AccelerometerBuffer rawAccelerometerBuffer{};
 
         void StartRead(const uint16_t reg, std::span<uint8_t>(buffer), const State succesfulState);
         [[nodiscard]] std::optional<uint8_t> ReadRegister(uint8_t reg);
@@ -56,5 +67,6 @@ namespace Device
         void OnRxComplete();
         std::optional<uint8_t> ReadWhoAmI();
         std::optional<float> ReadAccelerometerX();
+        std::optional<AccelerometerReading> ReadAccelerometer();
     };
 };

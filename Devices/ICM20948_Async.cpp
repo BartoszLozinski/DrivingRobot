@@ -23,6 +23,9 @@ namespace Device
         case RxAccelerometerXReadingLow:
             state = AccelerometerXReadyToReadLow;
             break;
+        case RxAccelerometerReading:
+            state = AccelerometerReadyToRead;
+            break;
         default:  
             state = RegisterReadyToRead;
         }
@@ -66,6 +69,33 @@ namespace Device
         return std::nullopt;
     }
 
+    std::optional<AccelerometerReading> ICM20948_Async::ReadAccelerometer()
+    {
+        switch (state)
+        {
+        case State::Idle:
+            StartRead(static_cast<uint16_t>(RegisterAddresses::ACCEL_XOUT_H)
+                    , rawAccelerometerBuffer
+                    , State::RxAccelerometerReading);
+            break;
+        case State::AccelerometerReadyToRead:
+            i2c.NotifyDataIsRead();
+            state = State::Idle;
+            // TODO selected base on Resolution (documentation paage 12/89 -  Accelerometer specifications)
+            static constexpr float sensitivity = 16384.0f; // LSB/g for ±2g full scale range
+            AccelerometerReading reading;
+
+            reading.x = static_cast<float>(static_cast<int16_t>((rawAccelerometerBuffer[0] << 8) | rawAccelerometerBuffer[1])) / sensitivity;
+            reading.y = static_cast<float>(static_cast<int16_t>((rawAccelerometerBuffer[2] << 8) | rawAccelerometerBuffer[3])) / sensitivity;
+            reading.z = static_cast<float>(static_cast<int16_t>((rawAccelerometerBuffer[4] << 8) | rawAccelerometerBuffer[5])) / sensitivity;
+            
+            return reading;
+        default:
+            break;
+        }
+
+        return std::nullopt;
+    }
 
     std::optional<uint8_t> ICM20948_Async::ReadRegister(const uint8_t reg)
     {
