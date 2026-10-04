@@ -120,7 +120,7 @@ int main()
             ledControlFunction();
         }
     }};
-
+/*
     Task<RegisterLevel::SoftwareTimer> readICM20948WhoAmI{ 250, [&]()
     {
         if (icm20948Async.IsAwake())
@@ -139,12 +139,44 @@ int main()
             uart2.Transmit(reinterpret_cast<const uint8_t*>(wakingUpMessage), sizeof(wakingUpMessage) - 1);
         }
     }};
+*/
+
+    std::optional<float> accelerometerX = std::nullopt;
+
+    Task<RegisterLevel::SoftwareTimer> readICM20948AccelerometerX{ 10, [&]()
+    {
+        if (icm20948Async.IsAwake())
+        {
+            if (const auto readValue = icm20948Async.ReadAccelerometerX(); readValue)
+                accelerometerX = readValue.value();
+        }
+        else
+        {
+            icm20948Async.WakeUp();
+            static constexpr uint8_t wakingUpMessage[] = "Waking up ICM-20948\r\n";
+            uart2.Transmit(reinterpret_cast<const uint8_t*>(wakingUpMessage), sizeof(wakingUpMessage) - 1);
+        }
+    }};
+
+    Task<RegisterLevel::SoftwareTimer> printAccelerometerX{ 250, [&]()
+    {
+        if (accelerometerX)
+        {
+            char messageBuffer[20];
+            snprintf(messageBuffer, sizeof(messageBuffer), "Accel X: %.2f\r\n", accelerometerX.value());
+            uart2.Transmit(reinterpret_cast<const uint8_t*>(messageBuffer), strlen(messageBuffer));
+        }
+    }};
+
+
+
     
-    Scheduler<Task<RegisterLevel::SoftwareTimer>, 5> scheduler{ { readLPS25HBSensorTask
+    Scheduler<Task<RegisterLevel::SoftwareTimer>, 6> scheduler{ { readLPS25HBSensorTask
                                                       , printTemperaturePressureTask
                                                       , ld2Task
                                                       , ledControllerTask
-                                                      , readICM20948WhoAmI } };
+                                                      , readICM20948AccelerometerX
+                                                      , printAccelerometerX } };
 
     // LPS25HB test
     uart1.ConfigureInterruptsPriority(IRQn_Type::USART1_IRQn, 1);

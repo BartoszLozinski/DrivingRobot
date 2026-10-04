@@ -13,15 +13,59 @@ namespace Device
     void ICM20948_Async::OnRxComplete()
     {
         i2c.OnRxComplete();
-        state = State::RegisterReadyToRead;
+
+        using enum State;
+        switch (state)
+        {
+        case RxAccelerometerXReadingHigh:
+            state = AccelerometerXReadyToReadHigh;
+            break;
+        case RxAccelerometerXReadingLow:
+            state = AccelerometerXReadyToReadLow;
+            break;
+        default:  
+            state = RegisterReadyToRead;
+        }
     }
 
     void ICM20948_Async::OnTxComplete()
     {
         i2c.OnTxComplete();
-        if (state == State::WakeUpScheduled)
-            state = State::WakeUpCompleted;
+
+        using enum State;
+        if (state == WakeUpScheduled)
+            state = WakeUpCompleted;
     }
+
+    std::optional<float> ICM20948_Async::ReadAccelerometerX()
+    {
+        switch (state)
+        {
+        case State::Idle:
+            StartRead(static_cast<uint16_t>(RegisterAddresses::ACCEL_XOUT_H)
+                    , std::span<uint8_t>(&rawAccelerometerXBuffer[0], 1)
+                    , State::RxAccelerometerXReadingHigh);
+            break;
+        case State::AccelerometerXReadyToReadHigh:
+            i2c.NotifyDataIsRead();
+            StartRead(static_cast<uint16_t>(RegisterAddresses::ACCEL_XOUT_L)
+                    , std::span<uint8_t>(&rawAccelerometerXBuffer[1], 1)
+                    , State::RxAccelerometerXReadingLow);
+            break;
+        case State::AccelerometerXReadyToReadLow:
+            i2c.NotifyDataIsRead();
+            state = State::Idle;
+
+            // TODO selected base on Resolution (documentation paage 12/89 -  Accelerometer specifications)
+            static constexpr float sensitivity = 16384.0f; // LSB/g for ±2g full scale range
+            return static_cast<float>(static_cast<int16_t>((rawAccelerometerXBuffer[0] << 8) | rawAccelerometerXBuffer[1])) / sensitivity;
+        default:
+            break;
+        }
+
+        return std::nullopt;
+    }
+
 
     std::optional<uint8_t> ICM20948_Async::ReadRegister(const uint8_t reg)
     {
