@@ -26,10 +26,6 @@ namespace Device
             RegisterReadyToRead,
             RxAccelerometerReading,
             AccelerometerReadyToRead,
-            RxAccelerometerXReadingHigh, // might be unnecessary
-            AccelerometerXReadyToReadHigh, // might be unnecessary
-            RxAccelerometerXReadingLow, // might be unnecessary
-            AccelerometerXReadyToReadLow, // might be unnecessary
             WakeUpCompleted,
             Error,
         };
@@ -43,7 +39,6 @@ namespace Device
         uint8_t currentPwrMgmt1Reg = 0x41; //default value after reset, device is in sleep mode (bit 7 = 1), auto selects best available clock source (bit 2:0 = 1-5)
         
         uint8_t readRegisterBuffer{};
-        AccelerometerDirectionBuffer rawAccelerometerXBuffer{};
         AccelerometerBuffer rawAccelerometerBuffer{};
 
         void StartRead(const uint16_t reg, std::span<uint8_t>(buffer), const State succesfulState);
@@ -66,7 +61,6 @@ namespace Device
         void OnTxComplete();
         void OnRxComplete();
         std::optional<uint8_t> ReadWhoAmI();
-        std::optional<float> ReadAccelerometerX();
         std::optional<AccelerometerReading> ReadAccelerometer();
     };
 };

@@ -17,12 +17,6 @@ namespace Device
         using enum State;
         switch (state)
         {
-        case RxAccelerometerXReadingHigh:
-            state = AccelerometerXReadyToReadHigh;
-            break;
-        case RxAccelerometerXReadingLow:
-            state = AccelerometerXReadyToReadLow;
-            break;
         case RxAccelerometerReading:
             state = AccelerometerReadyToRead;
             break;
@@ -40,35 +34,6 @@ namespace Device
             state = WakeUpCompleted;
     }
 
-    std::optional<float> ICM20948_Async::ReadAccelerometerX()
-    {
-        switch (state)
-        {
-        case State::Idle:
-            StartRead(static_cast<uint16_t>(RegisterAddresses::ACCEL_XOUT_H)
-                    , std::span<uint8_t>(&rawAccelerometerXBuffer[0], 1)
-                    , State::RxAccelerometerXReadingHigh);
-            break;
-        case State::AccelerometerXReadyToReadHigh:
-            i2c.NotifyDataIsRead();
-            StartRead(static_cast<uint16_t>(RegisterAddresses::ACCEL_XOUT_L)
-                    , std::span<uint8_t>(&rawAccelerometerXBuffer[1], 1)
-                    , State::RxAccelerometerXReadingLow);
-            break;
-        case State::AccelerometerXReadyToReadLow:
-            i2c.NotifyDataIsRead();
-            state = State::Idle;
-
-            // TODO selected base on Resolution (documentation paage 12/89 -  Accelerometer specifications)
-            static constexpr float sensitivity = 16384.0f; // LSB/g for ±2g full scale range
-            return static_cast<float>(static_cast<int16_t>((rawAccelerometerXBuffer[0] << 8) | rawAccelerometerXBuffer[1])) / sensitivity;
-        default:
-            break;
-        }
-
-        return std::nullopt;
-    }
-
     std::optional<AccelerometerReading> ICM20948_Async::ReadAccelerometer()
     {
         switch (state)
@@ -82,9 +47,10 @@ namespace Device
             i2c.NotifyDataIsRead();
             state = State::Idle;
             // TODO selected base on Resolution (documentation paage 12/89 -  Accelerometer specifications)
-            static constexpr float sensitivity = 16384.0f; // LSB/g for ±2g full scale range
+            static constexpr float sensitivity = 16384.0f; // LSB/g for ±2g full scale range - TODO to be selected in a constructor and read
             AccelerometerReading reading;
 
+            // reading HIGH/LOW bytes and converting to signed 16-bit integers, then scaling to g's
             reading.x = static_cast<float>(static_cast<int16_t>((rawAccelerometerBuffer[0] << 8) | rawAccelerometerBuffer[1])) / sensitivity;
             reading.y = static_cast<float>(static_cast<int16_t>((rawAccelerometerBuffer[2] << 8) | rawAccelerometerBuffer[3])) / sensitivity;
             reading.z = static_cast<float>(static_cast<int16_t>((rawAccelerometerBuffer[4] << 8) | rawAccelerometerBuffer[5])) / sensitivity;
