@@ -9,7 +9,7 @@ namespace Device
     {
         return isAwake;
     }
-
+    
     void ICM20948_Async::OnRxComplete()
     {
         i2c.OnRxComplete();
@@ -17,8 +17,8 @@ namespace Device
         using enum State;
         switch (state)
         {
-        case RxAccelerometerReading:
-            state = AccelerometerReadyToRead;
+        case SampleReading:
+            state = SampleReadyToRead;
             break;
         default:  
             state = RegisterReadyToRead;
@@ -34,28 +34,35 @@ namespace Device
             state = WakeUpCompleted;
     }
 
-    std::optional<AccelerometerReading> ICM20948_Async::ReadAccelerometer()
+    std::optional<AccelerometerGyroSample> ICM20948_Async::ReadAccelerometerGyro()
     {
         switch (state)
         {
         case State::Idle:
             StartRead(static_cast<uint16_t>(RegisterAddresses::ACCEL_XOUT_H)
-                    , rawAccelerometerBuffer
-                    , State::RxAccelerometerReading);
+                    , rawAccelerometerGyroBuffer
+                    , State::SampleReading);
+
             break;
-        case State::AccelerometerReadyToRead:
+        case State::SampleReadyToRead:
+        {
             i2c.NotifyDataIsRead();
             state = State::Idle;
-            // TODO selected base on Resolution (documentation paage 12/89 -  Accelerometer specifications)
-            static constexpr float sensitivity = 16384.0f; // LSB/g for ±2g full scale range - TODO to be selected in a constructor and read
-            AccelerometerReading reading;
+            // Documentation chapter 3.1/3.2 page 11/89
+            static constexpr float accelerometerSensitivity = 16384.0f; // LSB/g for ±2g full scale range - TODO to be selected in a constructor and read
+            static constexpr float gyroSensitivity = 131.0f; // LSB/(°/s) for ±250°/s full scale range - TODO to be selected in a constructor and read
+            AccelerometerGyroSample reading;
 
             // reading HIGH/LOW bytes and converting to signed 16-bit integers, then scaling to g's
-            reading.x = static_cast<float>(static_cast<int16_t>((rawAccelerometerBuffer[0] << 8) | rawAccelerometerBuffer[1])) / sensitivity;
-            reading.y = static_cast<float>(static_cast<int16_t>((rawAccelerometerBuffer[2] << 8) | rawAccelerometerBuffer[3])) / sensitivity;
-            reading.z = static_cast<float>(static_cast<int16_t>((rawAccelerometerBuffer[4] << 8) | rawAccelerometerBuffer[5])) / sensitivity;
+            reading.accelX = static_cast<float>(static_cast<int16_t>((rawAccelerometerGyroBuffer[0] << 8) | rawAccelerometerGyroBuffer[1])) / accelerometerSensitivity;
+            reading.accelY = static_cast<float>(static_cast<int16_t>((rawAccelerometerGyroBuffer[2] << 8) | rawAccelerometerGyroBuffer[3])) / accelerometerSensitivity;
+            reading.accelZ = static_cast<float>(static_cast<int16_t>((rawAccelerometerGyroBuffer[4] << 8) | rawAccelerometerGyroBuffer[5])) / accelerometerSensitivity;
+            reading.gyroX = static_cast<float>(static_cast<int16_t>((rawAccelerometerGyroBuffer[6] << 8) | rawAccelerometerGyroBuffer[7])) / gyroSensitivity;
+            reading.gyroY = static_cast<float>(static_cast<int16_t>((rawAccelerometerGyroBuffer[8] << 8) | rawAccelerometerGyroBuffer[9])) / gyroSensitivity;
+            reading.gyroZ = static_cast<float>(static_cast<int16_t>((rawAccelerometerGyroBuffer[10] << 8) | rawAccelerometerGyroBuffer[11])) / gyroSensitivity;
             
             return reading;
+        }
         default:
             break;
         }
@@ -112,7 +119,6 @@ namespace Device
                      , State::TransferScheduled);
             break;
         case State::RegisterReadyToRead:
-            //currentPwrMgmt1Reg = readRegisterBuffer;
             static constexpr uint8_t defaultPwrMgmt1Reg = 0x41; //default value after reset, device is in sleep mode (bit 7 = 1), auto selects best available clock source (bit 2:0 = 1-5)
             currentPwrMgmt1Reg = defaultPwrMgmt1Reg;
             

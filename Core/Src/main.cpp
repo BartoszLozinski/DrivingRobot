@@ -26,7 +26,6 @@ Peripherals::HAL::Pwm tim3_ch1_pa6{ htim3, TIM_CHANNEL_1 }; //PA6
 Device::LPS25HB_Async lps25hbAsync{ i2c1IT };
 Device::ICM20948_Async icm20948Async{ i2c2IT };
 
-// TODO add ICM-20948 accelerometer (i2C then SPI)
 // TODO add documentation
 
 int main()
@@ -121,14 +120,14 @@ int main()
         }
     }};
 
-    std::optional<AccelerometerReading> accelerometer = std::nullopt;
+    std::optional<AccelerometerGyroSample> accelerometerGyro = std::nullopt;
 
     Task<RegisterLevel::SoftwareTimer> readICM20948Accelerometer{ 10, [&]()
     {
         if (icm20948Async.IsAwake())
         {
-            if (const auto readValue = icm20948Async.ReadAccelerometer(); readValue)
-                accelerometer = readValue.value();
+            if (const auto readValue = icm20948Async.ReadAccelerometerGyro(); readValue)
+                accelerometerGyro = readValue.value();
         }
         else
         {
@@ -138,13 +137,15 @@ int main()
         }
     }};
 
-    Task<RegisterLevel::SoftwareTimer> printAccelerometer{ 500, [&]()
+    Task<RegisterLevel::SoftwareTimer> printAccelerometer{ 1000, [&]()
     {
-        if (accelerometer)
+        if (accelerometerGyro)
         {
-            const auto& value = accelerometer.value();
-            char messageBuffer[32];
-            snprintf(messageBuffer, sizeof(messageBuffer), "Accel: [%.2f, %.2f, %.2f]\r\n", value.x, value.y, value.z);
+            const auto& value = accelerometerGyro.value();
+            char messageBuffer[64];
+            snprintf(messageBuffer, sizeof(messageBuffer), "Acc[%.2f, %.2f, %.2f] g\r\nGyro[%.2f, %.2f, %.2f] deg/s\r\n"
+                    , value.accelX, value.accelY, value.accelZ
+                    , value.gyroX, value.gyroY, value.gyroZ);
             uart2.Transmit(reinterpret_cast<const uint8_t*>(messageBuffer), strlen(messageBuffer));
         }
     }};
