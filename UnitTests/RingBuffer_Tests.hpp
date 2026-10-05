@@ -83,19 +83,19 @@ TYPED_TEST(RingBuffer_Fixture, FillBufferCompletely)
 {
     // Fill buffer to capacity - 1 and verify it's full
     // We fill with values to track content
-    for (std::size_t i = 0; i < 7; i++)  // Assuming buffer size >= 8
+    for (std::size_t i = 0; i < this->buffer.Capacity() - 1; i++)  // Assuming buffer size >= 8
     {
         bool result = this->buffer.Push(i);
         ASSERT_TRUE(result);
     }
     
     ASSERT_TRUE(this->buffer.IsFull());
-    ASSERT_EQ(this->buffer.Size(), 7);
+    ASSERT_EQ(this->buffer.Size(), this->buffer.Capacity() - 1);
 }
 
 TYPED_TEST(RingBuffer_Fixture, PushWhenFull)
 {
-    constexpr std::size_t capacity = 8;
+    const auto capacity = this->buffer.Capacity();
     // Fill buffer to capacity - 1 (since we can't actually fill completely due to ring buffer design)
     for (std::size_t i = 0; i < capacity - 1; i++)
     {

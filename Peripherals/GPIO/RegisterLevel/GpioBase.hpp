@@ -30,7 +30,6 @@ namespace Peripherals
             { port.ASCR } -> std::convertible_to<volatile uint32_t&>;
         };
 
-        //TODO: expose Init methods and move out of the constructors
         template<GpioPort Port, uint8_t pin_>
         class GpioBase
         {

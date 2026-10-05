@@ -29,7 +29,7 @@ public:
     I2CMock i2cMock;
     Device::LPS25HB lps25hb{ i2cMock };
 
-    static constexpr uint16_t devAddr = 0xBA;
+    static constexpr uint16_t devAddr = 0x5D;
     static constexpr uint16_t AUTO_INCREMENT = 0x80;
 };
 
@@ -40,7 +40,7 @@ public:
     I2CMock_IT i2cMock_IT;
     Device::LPS25HB_Async lps25hbAsync{ i2cMock_IT };
 
-    static constexpr uint16_t devAddr = 0xBA;
+    static constexpr uint16_t devAddr = 0x5D;
     static constexpr uint16_t AUTO_INCREMENT = 0x80;
 };
 

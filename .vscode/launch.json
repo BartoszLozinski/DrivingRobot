@@ -23,7 +23,7 @@
             "name": "Debug Tests",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/buildTests/UnitTests",
+            "program": "${workspaceFolder}/buildTests/Debug/UnitTests",
             "cwd": "${workspaceFolder}",
             "MIMode": "gdb",
             "miDebuggerPath": "/usr/bin/gdb"

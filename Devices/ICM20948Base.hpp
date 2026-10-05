@@ -10,7 +10,6 @@ namespace Device
     protected:
         // documentation page 38/89
         // User Bank 0 Registers
-        //TODO move address shifiting to the I2C class responsibility
         enum class RegisterAddresses : uint8_t
         {
             ADDR = 0x69, // 7-bit I2C address (AD0 high)

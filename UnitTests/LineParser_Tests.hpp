@@ -81,15 +81,13 @@ TEST_F(LineParser_Fixture, ReadLineWithCarriageReturnAndNewline)
     ASSERT_EQ(std::string(reinterpret_cast<const char*>(line.data()), line.size()), "Data");
 }
 
-TEST_F(LineParser_Fixture, ReadEmptyLineWithNewline)
+TEST_F(LineParser_Fixture, ReadEmptyLineWithNewlineIgnoreEmptyLine)
 {
     uart.AddData("\n");
     
     auto result = parser.ReadLine();
     
-    ASSERT_TRUE(result.has_value());
-    auto line = result.value();
-    ASSERT_EQ(line.size(), 0);
+    ASSERT_FALSE(result.has_value());
 }
 
 TEST_F(LineParser_Fixture, NoDataAvailable)
@@ -199,14 +197,13 @@ TEST_F(LineParser_Fixture, ConsecutiveNewlines)
     uart.AddData("Line\n\nNext\n");
     
     auto result1 = parser.ReadLine();
+
     ASSERT_TRUE(result1.has_value());
     ASSERT_EQ(std::string(reinterpret_cast<const char*>(result1.value().data()), result1.value().size()), "Line");
-    
+
     auto result2 = parser.ReadLine();
+
     ASSERT_TRUE(result2.has_value());
-    ASSERT_EQ(result2.value().size(), 0); // Empty line
-    
-    auto result3 = parser.ReadLine();
-    ASSERT_TRUE(result3.has_value());
-    ASSERT_EQ(std::string(reinterpret_cast<const char*>(result3.value().data()), result3.value().size()), "Next");
+    ASSERT_EQ(std::string(reinterpret_cast<const char*>(result2.value().data()), result2.value().size()), "Next");
+
 }

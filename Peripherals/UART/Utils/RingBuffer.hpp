@@ -17,6 +17,7 @@ public:
     static_assert(BufferSize > 1, "Buffer size must be greater than 1.");
     [[nodiscard]] bool IsEmpty() const { return head == tail; }
     [[nodiscard]] bool IsFull() const { return Next(head) == tail; }
+    
     [[nodiscard]] bool Push(const T& value)
     {
         const auto nextHead = Next(head);
@@ -26,6 +27,7 @@ public:
         head = nextHead;
         return true;
     }
+
     std::optional<T> Pop()
     {
         if (IsEmpty())
@@ -34,6 +36,7 @@ public:
         tail = Next(tail);
         return value;
     }
+    
     [[nodiscard]] std::size_t Size() const
     {
         if (head >= tail)
@@ -41,6 +44,8 @@ public:
         else
             return BufferSize - (tail - head);
     }
+
+    [[nodiscard]] std::size_t Capacity() const { return BufferSize; }
 };
 
 template<std::size_t BufferSize>
