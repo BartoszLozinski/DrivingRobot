@@ -50,6 +50,8 @@ namespace Device
         {
             Idle,
             TransferScheduled,
+            PreparingToWakeUp,
+            ReadyToWakeUp,
             WakeUpScheduled,
             RegisterReadyToRead,
             SampleReading,
@@ -58,8 +60,6 @@ namespace Device
             SettingRegBankToThePreviousValue,
             SettingRegBankDone,
             SettingRegBankToThePreviousValueDone,
-            RegBankSelReading,
-            RegBankSelReadyToRead,
             AccelConfigReading,
             AccelConfigReadyToRead,
             SetAccelerometerSensitivity,
@@ -78,33 +78,30 @@ namespace Device
 
         Peripherals::I2CBase_IT& i2c;
         State state = State::Idle;
-        ICM20948::AccelerometerSensitivity accSensitivity = ICM20948::AccelerometerSensitivity::g2;
-        bool isAwake = false;
-        //TODO add events beside states and maybe states per event with current event value
-        bool isInitialized = false; // flag marking if sensitivity is already set up
+        volatile ICM20948::AccelerometerSensitivity accSensitivity = ICM20948::AccelerometerSensitivity::g2;
+        bool isReady = false;
 
         uint8_t currentPwrMgmt1Reg = 0x41; //default value after reset, device is in sleep mode (bit 7 = 1), auto selects best available clock source (bit 2:0 = 1-5)
         uint8_t readRegisterBuffer{};
-        uint8_t currentRegBankSel{};
         uint8_t currentAccelConfig{};
         AccelerometerGyroBuffer rawAccelerometerGyroBuffer{};
 
+        [[nodiscard]] float GetAccelerometerSensitivity() const;
+
+        [[nodiscard]] std::optional<uint8_t> ReadRegister(uint8_t reg);
         void StartRead(const uint16_t reg, std::span<uint8_t>(buffer), const State succesfulState);
         void SelectRegBank(const RegBankSelBits regBank);
         void SetAccelerometerSensitivityValue(const ICM20948::AccelerometerSensitivity accSensitivity);
-        [[nodiscard]] std::optional<uint8_t> ReadRegister(uint8_t reg);
 
     public:
         ICM20948_Async(Peripherals::I2CBase_IT& i2c_);
 
-        [[nodiscard]] bool IsAwake() const;
-        [[nodiscard]] bool IsInitialized() const;
+        [[nodiscard]] bool IsReady() const;
         void WakeUp() override;
         void OnTxComplete();
         void OnRxComplete();
         std::optional<uint8_t> ReadWhoAmI();
         std::optional<AccelerometerGyroSample> ReadAccelerometerGyro();
-        void SetSensitivity(const ICM20948::AccelerometerSensitivity accSensitivity);
 
         void Init(const ICM20948::AccelerometerSensitivity accSensitivity);
     };

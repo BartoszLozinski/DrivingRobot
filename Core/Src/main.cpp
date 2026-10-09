@@ -123,25 +123,16 @@ int main()
 
     Task<RegisterLevel::SoftwareTimer> readICM20948Accelerometer{ 50, [&]()
     {
-        if (icm20948Async.IsAwake())
+        if (icm20948Async.IsReady())
         {
-            if (icm20948Async.IsInitialized())
-            {
-                if (const auto readValue = icm20948Async.ReadAccelerometerGyro(); readValue)
-                    accelerometerGyro = readValue.value();
-            }
-            else
-            {
-                icm20948Async.SetSensitivity(Device::ICM20948::AccelerometerSensitivity::g4);
-                static constexpr char initializeMsg[] = "Initializing ICM-20948\r\n";
-                uart2.Transmit(reinterpret_cast<const uint8_t*>(initializeMsg), strlen(initializeMsg));
-            }
+            if (const auto readValue = icm20948Async.ReadAccelerometerGyro(); readValue)
+                accelerometerGyro = readValue.value();
         }
         else
         {
-            icm20948Async.WakeUp();
-            static constexpr char wakingUpMessage[] = "Waking up ICM-20948\r\n";
-            uart2.Transmit(reinterpret_cast<const uint8_t*>(wakingUpMessage), strlen(wakingUpMessage));
+            icm20948Async.Init(Device::ICM20948::AccelerometerSensitivity::g2);
+            static constexpr char initMsg[] = "Initializing ICM-20948\r\n";
+            uart2.Transmit(reinterpret_cast<const uint8_t*>(initMsg), strlen(initMsg));
         }
     }};
 

@@ -5,17 +5,79 @@ namespace Device
     ICM20948_Async::ICM20948_Async(Peripherals::I2CBase_IT& i2c_)
         : i2c(i2c_) {}
 
-    void ICM20948_AsyncInit([[maybe_unused]] const ICM20948::AccelerometerSensitivity accSensitivity)
-    {}
-
-    bool ICM20948_Async::IsAwake() const
+    float ICM20948_Async::GetAccelerometerSensitivity() const
     {
-        return isAwake;
+        // documentation chapter 3.2 ACCEL_FS
+        // page 12/89
+        switch(accSensitivity)
+        {
+        using enum ICM20948::AccelerometerSensitivity;
+        case g2:
+            return 16384.f; // LSB/g
+        case g4:
+            return 8192.f;
+        case g8:
+            return 4096.f;
+        case g16:
+            return 2048.f;
+        default:
+            return 16384.f;
+        };
+    };
+
+
+    void ICM20948_Async::Init([[maybe_unused]] const ICM20948::AccelerometerSensitivity accSensitivity)
+    {
+        switch (state)
+        {
+        using enum State;
+        case Idle:
+            isReady = false;
+            i2c.NotifyDataIsRead();
+            SelectRegBank(RegBankSelBits::USER_BANK_0);
+            state = PreparingToWakeUp;
+            break;
+        case ReadyToWakeUp:
+            i2c.NotifyDataIsRead();
+            WakeUp();
+            state = State::WakeUpScheduled;
+            break;
+        case WakeUpCompleted:
+            // check if something needs to be adjusted
+            i2c.NotifyDataIsRead();
+            SelectRegBank(RegBankSelBits::USER_BANK_2);
+            state = State::SettingRegBank;
+            break;
+        case SettingRegBankDone:
+            i2c.NotifyDataIsRead();
+            StartRead( static_cast<uint16_t>(Bank2::RegisterAddresses::ACCEL_CONFIG)
+                     , std::span<uint8_t>(&currentAccelConfig, sizeof(currentAccelConfig))
+                     , AccelConfigReading);
+            break;
+        case AccelConfigReadyToRead:
+            i2c.NotifyDataIsRead();
+            SetAccelerometerSensitivityValue(accSensitivity);
+            state = State::SetAccelerometerSensitivity;
+            break;
+        case AccelerometerSensitivityUpdated:
+        //in that step Gyro can be set up
+            i2c.NotifyDataIsRead();
+            SelectRegBank(RegBankSelBits::USER_BANK_0);
+            state = SettingRegBankToThePreviousValue;
+            break;
+        case SettingRegBankToThePreviousValueDone:
+            i2c.NotifyDataIsRead();
+            state = Idle;
+            isReady = true;
+            break;
+        default:
+            break;
+        };
     }
     
-    bool ICM20948_Async::IsInitialized() const
+    bool ICM20948_Async::IsReady() const
     {
-        return isInitialized;
+        return isReady;
     }
 
     void ICM20948_Async::OnRxComplete()
@@ -28,9 +90,6 @@ namespace Device
         
         case SampleReading:
             state = SampleReadyToRead;
-            break;
-        case RegBankSelReading:
-            state = RegBankSelReadyToRead;
             break;
         case AccelConfigReading:
             state = AccelConfigReadyToRead;
@@ -48,7 +107,9 @@ namespace Device
         switch (state)
         {
         using enum State;
-
+        case PreparingToWakeUp:
+            state = ReadyToWakeUp;
+            break;
         case WakeUpScheduled:
             state = WakeUpCompleted;
             break;
@@ -81,7 +142,7 @@ namespace Device
             i2c.NotifyDataIsRead();
             state = State::Idle;
             // Documentation chapter 3.1/3.2 page 11/89
-            static constexpr float accelerometerSensitivity = 16384.0f; // LSB/g for ±2g full scale range - TODO to be selected in a constructor and read
+            const auto accelerometerSensitivity = GetAccelerometerSensitivity();
             static constexpr float gyroSensitivity = 131.0f; // LSB/(°/s) for ±250°/s full scale range - TODO to be selected in a constructor and read
             AccelerometerGyroSample reading;
 
@@ -140,13 +201,13 @@ namespace Device
         i2c.Write(static_cast<uint16_t>(Bank0::RegisterAddresses::ADDR)
                 , static_cast<uint16_t>(Bank0::RegisterAddresses::REG_BANK_SEL)
                 , std::span<uint8_t>(&value, sizeof(value)));
-        state = State::SettingRegBank;
     }
 
-    void ICM20948_Async::SetAccelerometerSensitivityValue(const ICM20948::AccelerometerSensitivity accSensitivity)
+    void ICM20948_Async::SetAccelerometerSensitivityValue(const ICM20948::AccelerometerSensitivity accSensitivity_)
     {
         static constexpr uint8_t ACCEL_FS_SEL_MASK = 0b110; // sensitivity bits (documentation page 64/89 - chapter 10.15: ACCEL_CONFIG)
         static constexpr uint8_t ACCEL_FS_SEL_OFFSET = 1;
+        this->accSensitivity = accSensitivity_;
 
         uint8_t value = currentAccelConfig;
         value &= ~(ACCEL_FS_SEL_MASK);
@@ -155,54 +216,7 @@ namespace Device
         i2c.Write(static_cast<uint16_t>(Bank0::RegisterAddresses::ADDR)
                 , static_cast<uint16_t>(Bank2::RegisterAddresses::ACCEL_CONFIG)
                 , std::span<uint8_t>(&value, sizeof(value)));
-
-        state = State::SetAccelerometerSensitivity;
-    }
-
-    void ICM20948_Async::SetSensitivity(const ICM20948::AccelerometerSensitivity accSensitivity)
-    {
-        //TODO add also gyro setup
-        switch (state)
-        {
-        using enum State;
-        case Idle:
-            isInitialized = false;
-            StartRead( static_cast<uint16_t>(Bank0::RegisterAddresses::REG_BANK_SEL)
-                     , std::span<uint8_t>(&currentRegBankSel, sizeof(currentRegBankSel))
-                     , State::RegBankSelReading);
-            break;
-        case RegBankSelReadyToRead:
-            i2c.NotifyDataIsRead();
-            SelectRegBank(RegBankSelBits::USER_BANK_2);
-            break;
-        case SettingRegBankDone:
-            i2c.NotifyDataIsRead();
-            StartRead( static_cast<uint16_t>(Bank2::RegisterAddresses::ACCEL_CONFIG)
-                     , std::span<uint8_t>(&currentAccelConfig, sizeof(currentAccelConfig))
-                     , State::AccelConfigReading);
-            break;
-        case AccelConfigReadyToRead:
-            i2c.NotifyDataIsRead();
-            SetAccelerometerSensitivityValue(accSensitivity);
-            break;
-        case AccelerometerSensitivityUpdated:
-        //in that step Gyro can be set up
-            i2c.NotifyDataIsRead();
-            i2c.Write(static_cast<uint16_t>(Bank0::RegisterAddresses::ADDR)
-                    , static_cast<uint16_t>(Bank0::RegisterAddresses::REG_BANK_SEL)
-                    , std::span<uint8_t>(&currentRegBankSel, sizeof(currentRegBankSel)));
-            state = State::SettingRegBankToThePreviousValue;
-            break;
-        case SettingRegBankToThePreviousValueDone:
-            i2c.NotifyDataIsRead();
-            state = State::Idle;
-            isInitialized = true;
-            break;
-        default:
-            break;
-        }
-    }
-    
+    }   
 
     void ICM20948_Async::StartRead(const uint16_t reg, std::span<uint8_t>(buffer), const State successfulState)
     {
@@ -213,33 +227,15 @@ namespace Device
 
     void ICM20948_Async::WakeUp()
     {
-        if (isAwake)
-            return;
+        i2c.NotifyDataIsRead();
+        static constexpr uint8_t defaultPwrMgmt1Reg = 0x41; //default value after reset, device is in sleep mode (bit 7 = 1), auto selects best available clock source (bit 2:0 = 1-5)
+        currentPwrMgmt1Reg = defaultPwrMgmt1Reg;
 
-        switch (state)
-        {
-        case State::Idle:
-            static constexpr uint8_t defaultPwrMgmt1Reg = 0x41; //default value after reset, device is in sleep mode (bit 7 = 1), auto selects best available clock source (bit 2:0 = 1-5)
-            currentPwrMgmt1Reg = defaultPwrMgmt1Reg;
-            
-            i2c.NotifyDataIsRead();
-            state = State::WakeUpScheduled;
-            static constexpr uint8_t SLEEP_MODE_BIT_MASK = 0x1 << 6; // 1 - sleep, 0 - wake up
-            currentPwrMgmt1Reg &= ~SLEEP_MODE_BIT_MASK;
+        static constexpr uint8_t SLEEP_MODE_BIT_MASK = 0x1 << 6; // 1 - sleep, 0 - wake up
+        currentPwrMgmt1Reg &= ~SLEEP_MODE_BIT_MASK;
 
-            i2c.Write(static_cast<uint16_t>(Bank0::RegisterAddresses::ADDR)
-                    , static_cast<uint16_t>(Bank0::RegisterAddresses::PWR_MGMT_1)
-                    , std::span<uint8_t>(&currentPwrMgmt1Reg, sizeof(currentPwrMgmt1Reg)));
-            break;
-        case State::WakeUpCompleted:
-            // check if something needs to be adjusted
-            i2c.NotifyDataIsRead();
-            isAwake = true;
-            state = State::Idle;
-            break;
-        default:
-            break;
-        };
+        i2c.Write(static_cast<uint16_t>(Bank0::RegisterAddresses::ADDR)
+                , static_cast<uint16_t>(Bank0::RegisterAddresses::PWR_MGMT_1)
+                , std::span<uint8_t>(&currentPwrMgmt1Reg, sizeof(currentPwrMgmt1Reg)));
     }
-    
 };
