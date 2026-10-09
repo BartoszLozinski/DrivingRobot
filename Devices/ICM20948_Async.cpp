@@ -167,7 +167,7 @@ namespace Device
     std::optional<uint8_t> ICM20948_Async::ReadRegister(const uint8_t reg)
     {
         if (state == State::Idle)
-        {
+        {   
             state = i2c.Read(static_cast<uint16_t>(Bank0::RegisterAddresses::ADDR)
                             , reg
                             , std::span<uint8_t>(&readRegisterBuffer, sizeof(readRegisterBuffer))) == Peripherals::I2CResult::Success ? State::TransferScheduled : State::Error;

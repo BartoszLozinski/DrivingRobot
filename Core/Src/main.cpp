@@ -120,13 +120,23 @@ int main()
     }};
 
     std::optional<AccelerometerGyroSample> accelerometerGyro = std::nullopt;
+    std::optional<uint8_t> whoIam = std::nullopt;
 
     Task<RegisterLevel::SoftwareTimer> readICM20948Accelerometer{ 50, [&]()
     {
         if (icm20948Async.IsReady())
         {
+            if (const auto value = icm20948Async.ReadWhoAmI(); value)
+                whoIam = value.value();
+
+            uint8_t printValue = whoIam.has_value() ? whoIam.value() : 0;
+            char whoIamMsg[32];
+            snprintf(whoIamMsg, sizeof(whoIamMsg), "WhoIAm[%u]\r\n", printValue);
+            uart2.Transmit(reinterpret_cast<const uint8_t*>(whoIamMsg), strlen(whoIamMsg));
+            /*
             if (const auto readValue = icm20948Async.ReadAccelerometerGyro(); readValue)
                 accelerometerGyro = readValue.value();
+            */
         }
         else
         {
