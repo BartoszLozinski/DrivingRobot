@@ -4,7 +4,6 @@
 #include "Peripherals/GPIO/RegisterLevel/GpioAlternate.hpp"
 #include "Peripherals/GPIO/RegisterLevel/GpioOutput.hpp"
 
-
 Peripherals::RegisterLevel::GpioAlternate<9> uart1Tx{ GPIOA, Peripherals::RegisterLevel::Gpio::AlternateFunction::AF7 };
 Peripherals::RegisterLevel::GpioAlternate<10> uart1Rx{ GPIOA, Peripherals::RegisterLevel::Gpio::AlternateFunction::AF7 };
 Peripherals::RegisterLevel::GpioAlternate<2> uart2Tx{ GPIOA, Peripherals::RegisterLevel::Gpio::AlternateFunction::AF7 };

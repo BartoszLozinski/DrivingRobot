@@ -12,10 +12,6 @@ concept TimerConcept = requires(T t)
     { t.IsExpired() } -> std::convertible_to<bool>;
 };
 
-// TODO: add interfaces for timer and task instead of concepts
-// TODO: support task with message buffer which is cleared periodically
-// instead of allocating inside the function
-
 template<TimerConcept TimerType>
 class Task
 {

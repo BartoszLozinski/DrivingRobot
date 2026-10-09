@@ -46,6 +46,9 @@ namespace Peripherals
 
         void I2C_IT::OnTxComplete()
         {
+            // TODO should it set Done state or maybe Idle, same with OnRxComplete
+            // It moves resposibility to reset i2c state to programmer
+            // pros/cons?
             if (state == I2CState::TxBusy)
                 state = I2CState::Done;
         }

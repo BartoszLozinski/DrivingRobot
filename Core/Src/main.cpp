@@ -26,8 +26,6 @@ Peripherals::HAL::Pwm tim3_ch1_pa6{ htim3, TIM_CHANNEL_1 }; //PA6
 Device::LPS25HB_Async lps25hbAsync{ i2c1IT };
 Device::ICM20948_Async icm20948Async{ i2c2IT };
 
-// TODO add documentation
-
 int main()
 {
     /* MCU Configuration--------------------------------------------------------*/
@@ -60,10 +58,11 @@ int main()
     }};
 
     Task<RegisterLevel::SoftwareTimer> printTemperaturePressureTask{ 1000, [&]()
-    {
+    {   /*
         char messageBuffer[48];
         snprintf(messageBuffer, sizeof(messageBuffer), "Temp: %.2f C, Pressure: %lu hPa\r\n", temperature, pressure);
         uart2.Transmit(reinterpret_cast<const uint8_t*>(messageBuffer), strlen(messageBuffer));
+        */
     }};
 
     Task<RegisterLevel::SoftwareTimer> ld2Task{ 150, [&]()
@@ -122,12 +121,21 @@ int main()
 
     std::optional<AccelerometerGyroSample> accelerometerGyro = std::nullopt;
 
-    Task<RegisterLevel::SoftwareTimer> readICM20948Accelerometer{ 10, [&]()
+    Task<RegisterLevel::SoftwareTimer> readICM20948Accelerometer{ 50, [&]()
     {
         if (icm20948Async.IsAwake())
         {
-            if (const auto readValue = icm20948Async.ReadAccelerometerGyro(); readValue)
-                accelerometerGyro = readValue.value();
+            if (icm20948Async.IsInitialized())
+            {
+                if (const auto readValue = icm20948Async.ReadAccelerometerGyro(); readValue)
+                    accelerometerGyro = readValue.value();
+            }
+            else
+            {
+                icm20948Async.SetSensitivity(Device::ICM20948::AccelerometerSensitivity::g4);
+                static constexpr char initializeMsg[] = "Initializing ICM-20948\r\n";
+                uart2.Transmit(reinterpret_cast<const uint8_t*>(initializeMsg), strlen(initializeMsg));
+            }
         }
         else
         {
@@ -137,15 +145,15 @@ int main()
         }
     }};
 
-    Task<RegisterLevel::SoftwareTimer> printAccelerometer{ 1000, [&]()
+    Task<RegisterLevel::SoftwareTimer> printAccelerometer{ 250, [&]()
     {
         if (accelerometerGyro)
         {
             const auto& value = accelerometerGyro.value();
             char messageBuffer[64];
-            snprintf(messageBuffer, sizeof(messageBuffer), "Acc[%.2f, %.2f, %.2f] g\r\nGyro[%.2f, %.2f, %.2f] deg/s\r\n"
-                    , value.accelX, value.accelY, value.accelZ
-                    , value.gyroX, value.gyroY, value.gyroZ);
+            snprintf(messageBuffer, sizeof(messageBuffer), "Acc[%.2f, %.2f, %.2f] g\r\n"//Gyro[%.2f, %.2f, %.2f] deg/s\r\n"
+                    , value.accelX, value.accelY, value.accelZ);
+                    //, value.gyroX, value.gyroY, value.gyroZ);
             uart2.Transmit(reinterpret_cast<const uint8_t*>(messageBuffer), strlen(messageBuffer));
         }
     }};
@@ -241,9 +249,8 @@ extern "C" void USART1_IRQHandler(void)
 {
     uart1.IRQHandler();
 }
-//TODO move it, so it will be used only in the stm32l4xx_it.c
+
 extern "C" void USART2_IRQHandler(void)
 {
     uart2.IRQHandler();
 }
-

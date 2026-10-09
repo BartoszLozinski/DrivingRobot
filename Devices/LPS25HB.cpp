@@ -4,8 +4,6 @@ namespace Device
 {
     LPS25HB::LPS25HB(Peripherals::I2CBase& i2c_) : i2c(i2c_) {}
 
-    // TODO WRITE UNIT TESTS!!!
-
     void LPS25HB::WriteRegister(const uint8_t reg, uint8_t value)
     {
         i2c.Write(Registers::ADDR, reg, std::span<uint8_t>(&value, sizeof(value)));
