@@ -62,8 +62,12 @@ namespace Device
             SettingRegBankToThePreviousValueDone,
             AccelConfigReading,
             AccelConfigReadyToRead,
+            GyroConfig1Reading,
+            GyroConfig1ReadyToRead,
             SetAccelerometerSensitivity,
             AccelerometerSensitivityUpdated,
+            SetGyroSensitivity,
+            GyroSensitivityUpdated,
             WakeUpCompleted,
             Error,
         };
@@ -78,20 +82,24 @@ namespace Device
 
         Peripherals::I2CBase_IT& i2c;
         State state = State::Idle;
-        volatile ICM20948::AccelerometerSensitivity accSensitivity = ICM20948::AccelerometerSensitivity::g2;
+        ICM20948::AccelerometerSensitivity accSensitivity = ICM20948::AccelerometerSensitivity::g2;
+        ICM20948::GyroscopeSensitivity gyroSensitivity = ICM20948::GyroscopeSensitivity::dps250;
         bool isReady = false;
 
         uint8_t currentPwrMgmt1Reg = 0x41; //default value after reset, device is in sleep mode (bit 7 = 1), auto selects best available clock source (bit 2:0 = 1-5)
         uint8_t readRegisterBuffer{};
         uint8_t currentAccelConfig{};
+        uint8_t currentGyroConfig{};
         AccelerometerGyroBuffer rawAccelerometerGyroBuffer{};
 
         [[nodiscard]] float GetAccelerometerSensitivity() const;
+        [[nodiscard]] float GetGyroscopeSensitivity() const;
 
         [[nodiscard]] std::optional<uint8_t> ReadRegister(uint8_t reg);
         void StartRead(const uint16_t reg, std::span<uint8_t>(buffer), const State succesfulState);
         void SelectRegBank(const RegBankSelBits regBank);
-        void SetAccelerometerSensitivityValue(const ICM20948::AccelerometerSensitivity accSensitivity);
+        void SetAccelerometerSensitivityValue(const ICM20948::AccelerometerSensitivity accSensitivity_);
+        void SetGyroscopeSensitivityValue(const ICM20948::GyroscopeSensitivity gyroSensitivity_);
 
     public:
         ICM20948_Async(Peripherals::I2CBase_IT& i2c_);
@@ -103,6 +111,6 @@ namespace Device
         std::optional<uint8_t> ReadWhoAmI();
         std::optional<AccelerometerGyroSample> ReadAccelerometerGyro();
 
-        void Init(const ICM20948::AccelerometerSensitivity accSensitivity);
+        void Init(const ICM20948::AccelerometerSensitivity accSensitivity_, const ICM20948::GyroscopeSensitivity gyroSensitivity_);
     };
 };

@@ -41,7 +41,7 @@ int main()
     volatile float temperature = 0.0f;
     volatile uint32_t pressure = 0;
 
-    Task<RegisterLevel::SoftwareTimer> readLPS25HBSensorTask{ 50, [&]()
+    Task<RegisterLevel::SoftwareTimer> readLPS25HBSensorTask{ 1000, [&]()
     {
         if (lps25hbAsync.IsAwake())
         {
@@ -57,12 +57,11 @@ int main()
         }
     }};
 
-    Task<RegisterLevel::SoftwareTimer> printTemperaturePressureTask{ 1000, [&]()
-    {   /*
+    Task<RegisterLevel::SoftwareTimer> printTemperaturePressureTask{ 2000, [&]()
+    {
         char messageBuffer[48];
         snprintf(messageBuffer, sizeof(messageBuffer), "Temp: %.2f C, Pressure: %lu hPa\r\n", temperature, pressure);
         uart2.Transmit(reinterpret_cast<const uint8_t*>(messageBuffer), strlen(messageBuffer));
-        */
     }};
 
     Task<RegisterLevel::SoftwareTimer> ld2Task{ 150, [&]()
@@ -121,7 +120,6 @@ int main()
 
     std::optional<AccelerometerGyroSample> accelerometerGyro = std::nullopt;
 
-    //todo check wirings check i2c if its not in an error state
     bool initializationNotPrintedOrChanged = true;
     Task<RegisterLevel::SoftwareTimer> readICM20948Accelerometer{ 50, [&]()
     {
@@ -132,7 +130,7 @@ int main()
         }
         else
         {
-            icm20948Async.Init(Device::ICM20948::AccelerometerSensitivity::g4);
+            icm20948Async.Init(Device::ICM20948::AccelerometerSensitivity::g4, Device::ICM20948::GyroscopeSensitivity::dps500);
             if (initializationNotPrintedOrChanged)
             {
                 initializationNotPrintedOrChanged = false;
@@ -142,15 +140,15 @@ int main()
         }
     }};
 
-    Task<RegisterLevel::SoftwareTimer> printAccelerometer{ 250, [&]()
+    Task<RegisterLevel::SoftwareTimer> printAccelerometer{ 500, [&]()
     {
         if (accelerometerGyro)
         {
             const auto& value = accelerometerGyro.value();
             char messageBuffer[64];
-            snprintf(messageBuffer, sizeof(messageBuffer), "Acc[%.2f, %.2f, %.2f] g\r\n"//Gyro[%.2f, %.2f, %.2f] deg/s\r\n"
-                    , value.accelX, value.accelY, value.accelZ);
-                    //, value.gyroX, value.gyroY, value.gyroZ);
+            snprintf(messageBuffer, sizeof(messageBuffer), "Acc[%.2f, %.2f, %.2f] g\r\nGyro[%.2f, %.2f, %.2f] deg/s\r\n"
+                    , value.accelX, value.accelY, value.accelZ
+                    , value.gyroX, value.gyroY, value.gyroZ);
             uart2.Transmit(reinterpret_cast<const uint8_t*>(messageBuffer), strlen(messageBuffer));
         }
     }};

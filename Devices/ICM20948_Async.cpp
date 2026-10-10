@@ -25,8 +25,28 @@ namespace Device
         };
     };
 
+    float ICM20948_Async::GetGyroscopeSensitivity() const
+    {
+        // documentation chapter 3.1 GYRO_FS
+        // page 11/89
+        switch(gyroSensitivity)
+        {
+        using enum ICM20948::GyroscopeSensitivity;
+        case dps250:
+            return 131.f; // LSB/dps
+        case dps500:
+            return 65.5f;
+        case dps1000:
+            return 32.8f;
+        case dps2000:
+            return 16.4f;
+        default:
+            return 131.f;
+        };
+    };
 
-    void ICM20948_Async::Init([[maybe_unused]] const ICM20948::AccelerometerSensitivity accSensitivity)
+
+    void ICM20948_Async::Init(const ICM20948::AccelerometerSensitivity accSensitivity_, const ICM20948::GyroscopeSensitivity gyroSensitivity_)
     {
         switch (state)
         {
@@ -56,11 +76,21 @@ namespace Device
             break;
         case AccelConfigReadyToRead:
             i2c.NotifyDataIsRead();
-            SetAccelerometerSensitivityValue(accSensitivity);
+            SetAccelerometerSensitivityValue(accSensitivity_);
             state = State::SetAccelerometerSensitivity;
             break;
         case AccelerometerSensitivityUpdated:
-        //in that step Gyro can be set up
+            i2c.NotifyDataIsRead();
+            StartRead( static_cast<uint16_t>(Bank2::RegisterAddresses::GYRO_CONFIG_1)
+                     , std::span<uint8_t>(&currentGyroConfig, sizeof(currentGyroConfig))
+                     , GyroConfig1Reading);
+            break;
+        case GyroConfig1ReadyToRead:
+            i2c.NotifyDataIsRead();
+            SetGyroscopeSensitivityValue(gyroSensitivity_);
+            state = State::SetGyroSensitivity;
+            break;
+        case GyroSensitivityUpdated:
             i2c.NotifyDataIsRead();
             SelectRegBank(RegBankSelBits::USER_BANK_0);
             state = SettingRegBankToThePreviousValue;
@@ -94,6 +124,9 @@ namespace Device
         case AccelConfigReading:
             state = AccelConfigReadyToRead;
             break;
+        case GyroConfig1Reading:
+            state = GyroConfig1ReadyToRead;
+            break;
         default:  
             state = RegisterReadyToRead;
             break;
@@ -122,6 +155,9 @@ namespace Device
         case SetAccelerometerSensitivity:
             state = AccelerometerSensitivityUpdated;
             break;
+        case SetGyroSensitivity:
+            state = GyroSensitivityUpdated;
+            break;
         default:
             break;
         }
@@ -143,7 +179,7 @@ namespace Device
             state = State::Idle;
             // Documentation chapter 3.1/3.2 page 11/89
             const auto accelerometerSensitivity = GetAccelerometerSensitivity();
-            static constexpr float gyroSensitivity = 131.0f; // LSB/(°/s) for ±250°/s full scale range - TODO to be selected in a constructor and read
+            const auto gyroSensitivity = GetGyroscopeSensitivity();
             AccelerometerGyroSample reading;
 
             // reading HIGH/LOW bytes and converting to signed 16-bit integers, then scaling to g's
@@ -203,11 +239,12 @@ namespace Device
                 , std::span<uint8_t>(&value, sizeof(value)));
     }
 
+    //TODO make inner of these two methods common
     void ICM20948_Async::SetAccelerometerSensitivityValue(const ICM20948::AccelerometerSensitivity accSensitivity_)
     {
         static constexpr uint8_t ACCEL_FS_SEL_MASK = 0b110; // sensitivity bits (documentation page 64/89 - chapter 10.15: ACCEL_CONFIG)
         static constexpr uint8_t ACCEL_FS_SEL_OFFSET = 1;
-        this->accSensitivity = accSensitivity_;
+        accSensitivity = accSensitivity_;
 
         uint8_t value = currentAccelConfig;
         value &= ~(ACCEL_FS_SEL_MASK);
@@ -217,6 +254,22 @@ namespace Device
                 , static_cast<uint16_t>(Bank2::RegisterAddresses::ACCEL_CONFIG)
                 , std::span<uint8_t>(&value, sizeof(value)));
     }   
+
+    void ICM20948_Async::SetGyroscopeSensitivityValue(const ICM20948::GyroscopeSensitivity gyroSensitivity_)
+    {
+        static constexpr uint8_t GYRO_FS_SEL_MASK = 0b110; // sensitivity bits (documentation page 59/89 - chapter 10.2: GYRO_CONFIG_1)
+        static constexpr uint8_t GYRO_FS_SEL_OFFSET = 1;
+        gyroSensitivity = gyroSensitivity_;
+
+        uint8_t value = currentAccelConfig;
+        value &= ~(GYRO_FS_SEL_MASK);
+        value |= static_cast<uint8_t>(gyroSensitivity) << GYRO_FS_SEL_OFFSET;
+            
+        i2c.Write(static_cast<uint16_t>(Bank0::RegisterAddresses::ADDR)
+                , static_cast<uint16_t>(Bank2::RegisterAddresses::GYRO_CONFIG_1)
+                , std::span<uint8_t>(&value, sizeof(value)));
+    }
+
 
     void ICM20948_Async::StartRead(const uint16_t reg, std::span<uint8_t>(buffer), const State successfulState)
     {
