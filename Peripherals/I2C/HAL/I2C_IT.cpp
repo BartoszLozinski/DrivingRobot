@@ -41,21 +41,19 @@ namespace Peripherals
         void I2C_IT::OnRxComplete()
         {
             if (state == I2CState::RxBusy)
-                state = I2CState::Done;
+                state = I2CState::RxDone;
         }
 
         void I2C_IT::OnTxComplete()
         {
-            // TODO should it set Done state or maybe Idle, same with OnRxComplete
-            // It moves resposibility to reset i2c state to programmer
-            // pros/cons?
             if (state == I2CState::TxBusy)
-                state = I2CState::Done;
+                state = I2CState::Idle;
         }
 
         void I2C_IT::NotifyDataIsRead()
         {
-            state = I2CState::Idle;
+            if (state == I2CState::RxDone)
+                state = I2CState::Idle;
         }
 
     }

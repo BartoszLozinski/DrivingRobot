@@ -17,7 +17,7 @@ namespace Peripherals
         Idle,
         RxBusy,
         TxBusy,
-        Done,
+        RxDone,
         Error
     };
 

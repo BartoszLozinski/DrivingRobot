@@ -129,7 +129,6 @@ namespace Device
     void ICM20948_Async::OnTxComplete()
     {
         i2c.OnTxComplete();
-        i2c.NotifyDataIsRead();
 
         switch (state)
         {
