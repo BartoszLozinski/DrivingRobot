@@ -123,7 +123,7 @@ int main()
 
     //todo check wirings check i2c if its not in an error state
     bool initializationNotPrintedOrChanged = true;
-    Task<RegisterLevel::SoftwareTimer> readICM20948Accelerometer{ 100, [&]()
+    Task<RegisterLevel::SoftwareTimer> readICM20948Accelerometer{ 50, [&]()
     {
         if (icm20948Async.IsReady())
         {
@@ -132,7 +132,7 @@ int main()
         }
         else
         {
-            icm20948Async.Init(Device::ICM20948::AccelerometerSensitivity::g2);
+            icm20948Async.Init(Device::ICM20948::AccelerometerSensitivity::g4);
             if (initializationNotPrintedOrChanged)
             {
                 initializationNotPrintedOrChanged = false;
