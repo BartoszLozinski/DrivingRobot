@@ -41,7 +41,7 @@ int main()
     volatile float temperature = 0.0f;
     volatile uint32_t pressure = 0;
 
-    Task<RegisterLevel::SoftwareTimer> readLPS25HBSensorTask{ 1000, [&]()
+    Task<RegisterLevel::SoftwareTimer> readLPS25HBSensorTask{ 500, [&]()
     {
         if (lps25hbAsync.IsAwake())
         {
@@ -149,6 +149,7 @@ int main()
             snprintf(messageBuffer, sizeof(messageBuffer), "Acc[%.2f, %.2f, %.2f] g\r\nGyro[%.2f, %.2f, %.2f] deg/s\r\n"
                     , value.accelX, value.accelY, value.accelZ
                     , value.gyroX, value.gyroY, value.gyroZ);
+
             uart2.Transmit(reinterpret_cast<const uint8_t*>(messageBuffer), strlen(messageBuffer));
         }
     }};

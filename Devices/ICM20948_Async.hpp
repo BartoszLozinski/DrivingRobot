@@ -2,6 +2,7 @@
 
 #include "ICM20948Base.hpp"
 #include "Peripherals/I2C/I2CBase.hpp"
+#include "type_traits"
 
 struct AccelerometerGyroSample
 {

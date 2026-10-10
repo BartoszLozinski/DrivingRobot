@@ -53,17 +53,14 @@ namespace Device
         using enum State;
         case Idle:
             isReady = false;
-            i2c.NotifyDataIsRead();
             SelectRegBank(RegBankSelBits::USER_BANK_0);
             state = PreparingToWakeUp;
             break;
         case ReadyToWakeUp:
-            i2c.NotifyDataIsRead();
             WakeUp();
             state = State::WakeUpScheduled;
             break;
         case WakeUpCompleted:
-            i2c.NotifyDataIsRead();
             SelectRegBank(RegBankSelBits::USER_BANK_2);
             state = State::SettingRegBank;
             break;
@@ -79,7 +76,6 @@ namespace Device
             state = State::SetAccelerometerSensitivity;
             break;
         case AccelerometerSensitivityUpdated:
-            i2c.NotifyDataIsRead();
             StartRead( static_cast<uint16_t>(Bank2::RegisterAddresses::GYRO_CONFIG_1)
                      , std::span<uint8_t>(&currentGyroConfig, sizeof(currentGyroConfig))
                      , GyroConfig1Reading);
@@ -90,12 +86,10 @@ namespace Device
             state = State::SetGyroSensitivity;
             break;
         case GyroSensitivityUpdated:
-            i2c.NotifyDataIsRead();
             SelectRegBank(RegBankSelBits::USER_BANK_0);
             state = SettingRegBankToThePreviousValue;
             break;
         case SettingRegBankToThePreviousValueDone:
-            i2c.NotifyDataIsRead();
             state = Idle;
             isReady = true;
             break;
@@ -135,6 +129,7 @@ namespace Device
     void ICM20948_Async::OnTxComplete()
     {
         i2c.OnTxComplete();
+        i2c.NotifyDataIsRead();
 
         switch (state)
         {
