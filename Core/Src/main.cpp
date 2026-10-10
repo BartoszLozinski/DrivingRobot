@@ -120,29 +120,25 @@ int main()
     }};
 
     std::optional<AccelerometerGyroSample> accelerometerGyro = std::nullopt;
-    std::optional<uint8_t> whoIam = std::nullopt;
 
-    Task<RegisterLevel::SoftwareTimer> readICM20948Accelerometer{ 50, [&]()
+    //todo check wirings check i2c if its not in an error state
+    bool initializationNotPrintedOrChanged = true;
+    Task<RegisterLevel::SoftwareTimer> readICM20948Accelerometer{ 100, [&]()
     {
         if (icm20948Async.IsReady())
         {
-            if (const auto value = icm20948Async.ReadWhoAmI(); value)
-                whoIam = value.value();
-
-            uint8_t printValue = whoIam.has_value() ? whoIam.value() : 0;
-            char whoIamMsg[32];
-            snprintf(whoIamMsg, sizeof(whoIamMsg), "WhoIAm[%u]\r\n", printValue);
-            uart2.Transmit(reinterpret_cast<const uint8_t*>(whoIamMsg), strlen(whoIamMsg));
-            /*
             if (const auto readValue = icm20948Async.ReadAccelerometerGyro(); readValue)
                 accelerometerGyro = readValue.value();
-            */
         }
         else
         {
             icm20948Async.Init(Device::ICM20948::AccelerometerSensitivity::g2);
-            static constexpr char initMsg[] = "Initializing ICM-20948\r\n";
-            uart2.Transmit(reinterpret_cast<const uint8_t*>(initMsg), strlen(initMsg));
+            if (initializationNotPrintedOrChanged)
+            {
+                initializationNotPrintedOrChanged = false;
+                static constexpr char initMsg[] = "Initializing ICM-20948\r\n";
+                uart2.Transmit(reinterpret_cast<const uint8_t*>(initMsg), strlen(initMsg));
+            }
         }
     }};
 
@@ -242,7 +238,14 @@ extern "C" void HAL_I2C_ErrorCallback(I2C_HandleTypeDef *hi2c)
 {
     if (hi2c->Instance == I2C1)
     {
-        // Optionally inspect hi2c->ErrorCode here for future debug.
+        static constexpr uint8_t i2c1ErrorMsg[] = "I2C1 Error\r\n";
+        uart2.Transmit(i2c1ErrorMsg, sizeof(i2c1ErrorMsg));
+    }
+
+    if (hi2c->Instance == I2C2)
+    {
+        static constexpr uint8_t i2c2ErrorMsg[] = "I2C2 Error\r\n";
+        uart2.Transmit(i2c2ErrorMsg, sizeof(i2c2ErrorMsg));
     }
 }
 
