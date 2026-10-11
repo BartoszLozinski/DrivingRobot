@@ -45,7 +45,6 @@ namespace Device
         };
     };
 
-    // TODO write tests
     void ICM20948_Async::Init(const ICM20948::AccelerometerSensitivity accSensitivity_, const ICM20948::GyroscopeSensitivity gyroSensitivity_)
     {
         switch (state)
@@ -156,7 +155,6 @@ namespace Device
         }
     }
 
-    // TODO write tests
     std::optional<AccelerometerGyroSample> ICM20948_Async::ReadAccelerometerGyro()
     {
         switch (state)
@@ -175,7 +173,7 @@ namespace Device
             const auto accelerometerSensitivity = GetAccelerometerSensitivity();
             const auto gyroSensitivity = GetGyroscopeSensitivity();
 
-            // reading HIGH/LOW bytes and converting to signed 16-bit integers, then scaling to g's
+            // reading HIGH/LOW bytes and converting to signed 16-bit integers, then scaling
             return AccelerometerGyroSample
             {
                 .accelX = static_cast<float>(static_cast<int16_t>((rawAccelerometerGyroBuffer[0] << 8) | rawAccelerometerGyroBuffer[1])) / accelerometerSensitivity,
@@ -192,7 +190,6 @@ namespace Device
 
         return std::nullopt;
     }
-
 
     std::optional<uint8_t> ICM20948_Async::ReadRegister(const uint8_t reg)
     {
