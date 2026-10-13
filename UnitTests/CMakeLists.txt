@@ -11,9 +11,34 @@ set(GMOCK_LIBRARIES     /usr/lib/libgmock.a
                         /usr/lib/libgmock_main.a
 )
 
+set(${PROJECT_NAME}_src     mainTests.cpp
+                            ICM20948_Tests.cpp
+                            LineParser_Tests.cpp
+                            LPS25HB_Tests.cpp
+                            RingBuffer_Tests.cpp
+)
+
+set(${PROJECT_NAME}_hpp     Mocks/I2CMock.hpp
+                            ICM20948_Tests.hpp
+                            LineParser_Tests.hpp
+                            LPS25HB_Tests.hpp
+                            RingBuffer_Tests.hpp
+)
+
+cmake_path(GET CMAKE_CURRENT_SOURCE_DIR PARENT_PATH parent_dir)
+
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../Devices ${CMAKE_CURRENT_BINARY_DIR}/Devices)
 
-add_executable(${PROJECT_NAME}  mainTests.cpp)
+add_executable(${PROJECT_NAME})
+
+target_sources(${PROJECT_NAME}
+    PRIVATE
+        ${${PROJECT_NAME}_src}
+    PUBLIC
+        FILE_SET HEADERS
+        BASE_DIRS ${parent_dir}
+        FILES ${${PROJECT_NAME}_hpp}
+)
 
 target_link_libraries(${PROJECT_NAME}
     PRIVATE

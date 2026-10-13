@@ -15,11 +15,6 @@ struct AccelerometerGyroSample
 };
 
 // TODO add documentation
-// TODO add sensitivity selection
-// remember to select appropriate bank
-// check before init
-// select back to BANK0 when finished with other banks
-// ADD init function
 
 namespace Device
 {
