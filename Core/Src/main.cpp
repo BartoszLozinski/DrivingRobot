@@ -22,6 +22,7 @@
 Peripherals::HAL::I2C_IT i2c1IT{ hi2c1 };
 Peripherals::HAL::I2C_IT i2c2IT{ hi2c2 };
 Peripherals::HAL::Pwm tim3_ch1_pa6{ htim3, TIM_CHANNEL_1 }; //PA6
+Peripherals::HAL::Pwm tim3_ch2_pa7{ htim3, TIM_CHANNEL_2 }; //PA7
 
 Device::LPS25HB_Async lps25hbAsync{ i2c1IT };
 Device::ICM20948_Async icm20948Async{ i2c2IT };
@@ -71,28 +72,38 @@ int main()
 
     Task<RegisterLevel::SoftwareTimer> ledControllerTask{ 10, [&]()
     {
-        volatile const auto currentPulse = tim3_ch1_pa6.GetPulse();
+        volatile const auto currentPulseRed = tim3_ch1_pa6.GetPulse();
+        volatile const auto currentPulseGreen = tim3_ch2_pa7.GetPulse();
         const auto readValue = uart1.Read();
 
         auto ledControlFunction = [&]()
         {
             static constexpr uint32_t restPulse = 799;
             static constexpr uint32_t restPulseIncreasement = 25;
-            if (currentPulse > restPulse)
+            if (currentPulseRed > restPulse)
             {
-                const uint32_t calculatedPulse = currentPulse - restPulseIncreasement;
-                tim3_ch1_pa6.SetPulse(calculatedPulse < restPulse ? restPulse : calculatedPulse);
+                const uint32_t calculatedPulseRed = currentPulseRed - restPulseIncreasement;
+                tim3_ch1_pa6.SetPulse(calculatedPulseRed < restPulse ? restPulse : calculatedPulseRed);
+                const uint32_t calculatedPulseGreen = currentPulseRed - restPulseIncreasement;
+                tim3_ch2_pa7.SetPulse(calculatedPulseGreen < restPulse ? restPulse : calculatedPulseGreen);
             }
-            else if (currentPulse < restPulse)
+            else if (currentPulseRed < restPulse)
             {
-                const uint32_t calculatedPulse = currentPulse + restPulseIncreasement;
-                tim3_ch1_pa6.SetPulse(calculatedPulse > restPulse ? restPulse : calculatedPulse);
+                const uint32_t calculatedPulseRed = currentPulseRed + restPulseIncreasement;
+                tim3_ch1_pa6.SetPulse(calculatedPulseRed > restPulse ? restPulse : calculatedPulseRed);
+                const uint32_t calculatedPulseGreen = currentPulseRed + restPulseIncreasement;
+                tim3_ch2_pa7.SetPulse(calculatedPulseGreen > restPulse ? restPulse : calculatedPulseGreen);
             }
         };
 
         // TODO:
         // add turning off option
         // and minimal pulse while turned on (simulation of not dropping too fast)
+        // TODO add simple simulator for wheels control (something reading angular velocity of wheels (percentage))
+        // and plotting wheels position of both
+        // calculate arcs etc
+        // remove adjust ledControlFunction, as idle state should aim to pulse = 0, instead of some value (customable)
+
         if (readValue)
         {
             static constexpr int32_t minPulse = 0;
@@ -100,12 +111,15 @@ int main()
 
             if (readValue.value() == 'w')
             {
-                tim3_ch1_pa6.SetPulse(currentPulse + increasement);
+                tim3_ch1_pa6.SetPulse(currentPulseRed + increasement);
+                tim3_ch2_pa7.SetPulse(currentPulseGreen + increasement);
             }
             else if (readValue.value() == 's')
             {
-                const int32_t calculatedPulse = currentPulse - increasement;
-                tim3_ch1_pa6.SetPulse(calculatedPulse < minPulse ? minPulse : calculatedPulse);
+                const int32_t calculatedPulseRed = currentPulseRed - increasement;
+                tim3_ch1_pa6.SetPulse(calculatedPulseRed < minPulse ? minPulse : calculatedPulseRed);
+                const int32_t calculatedPulseGreen = currentPulseRed - increasement;
+                tim3_ch2_pa7.SetPulse(calculatedPulseGreen < minPulse ? minPulse : calculatedPulseGreen);
             }
             else
             {
@@ -169,6 +183,7 @@ int main()
     ld2.Init();
 
     tim3_ch1_pa6.Start();
+    tim3_ch2_pa7.Start();
 
     while (true)
     {
