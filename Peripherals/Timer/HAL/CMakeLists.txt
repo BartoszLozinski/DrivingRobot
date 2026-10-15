@@ -2,8 +2,7 @@ set(target_name Timer)
 
 set(${target_name}_src  SoftwareTimer.cpp)
 
-set(${target_name}_hpp  ../TimerBase.hpp
-                        SoftwareTimer.hpp
+set(${target_name}_hpp  SoftwareTimer.hpp
 )
 
 file(READ
@@ -27,10 +26,8 @@ if (HAL_TIM_FOUND)
     )
 
     list(APPEND ${target_name}_hpp
-        ../InputCaptureInterface.hpp
         InputCapture.hpp
         InputCaptureIT.hpp
-        ../IPwm.hpp
         Pwm.hpp
     )
 
@@ -52,4 +49,7 @@ configure_library(${target_name}
 
 configure_embedded_target(${target_name})
 configure_HAL_target(${target_name})
-
+target_link_libraries(${target_name}
+    INTERFACE
+        TimerInterfaces    
+)

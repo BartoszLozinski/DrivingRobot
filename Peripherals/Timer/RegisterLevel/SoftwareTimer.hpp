@@ -1,6 +1,6 @@
 #pragma once
 
-#include "TimerBase.hpp"
+#include "TimerInterfaces/TimerBase.hpp"
 #include <cstdint>
 
 namespace RegisterLevel

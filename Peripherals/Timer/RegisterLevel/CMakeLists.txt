@@ -1,7 +1,6 @@
 set(target_name Timer_RegisterLevel)
 
 set(${target_name}_hpp
-    ../TimerBase.hpp
     SoftwareTimer.hpp
 )
 
@@ -15,3 +14,8 @@ configure_library(${target_name}
 )
 
 configure_embedded_target(${target_name})
+
+target_link_directories(${target_name}
+    INTERFACE
+        TimerInterfaces
+)
