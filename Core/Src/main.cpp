@@ -19,10 +19,12 @@
 #include "Scheduler/Task.hpp"
 #include "Scheduler/Scheduler.hpp"
 
+#include "WheelsController/WheelsController.hpp"
+
 Peripherals::HAL::I2C_IT i2c1IT{ hi2c1 };
 Peripherals::HAL::I2C_IT i2c2IT{ hi2c2 };
-Peripherals::HAL::Pwm tim3_ch1_pa6{ htim3, TIM_CHANNEL_1 }; //PA6
-Peripherals::HAL::Pwm tim3_ch2_pa7{ htim3, TIM_CHANNEL_2 }; //PA7
+Peripherals::HAL::Pwm tim3_ch1_pa6_left{ htim3, TIM_CHANNEL_1 }; //PA6
+Peripherals::HAL::Pwm tim3_ch2_pa7_right{ htim3, TIM_CHANNEL_2 }; //PA7
 
 Device::LPS25HB_Async lps25hbAsync{ i2c1IT };
 Device::ICM20948_Async icm20948Async{ i2c2IT };
@@ -72,8 +74,8 @@ int main()
 
     Task<RegisterLevel::SoftwareTimer> ledControllerTask{ 10, [&]()
     {
-        volatile const auto currentPulseRed = tim3_ch1_pa6.GetPulse();
-        volatile const auto currentPulseGreen = tim3_ch2_pa7.GetPulse();
+        volatile const auto currentPulseRed = tim3_ch1_pa6_left.GetPulse();
+        volatile const auto currentPulseGreen = tim3_ch2_pa7_right.GetPulse();
         const auto readValue = uart1.Read();
 
         auto ledControlFunction = [&]()
@@ -83,16 +85,16 @@ int main()
             if (currentPulseRed > restPulse)
             {
                 const uint32_t calculatedPulseRed = currentPulseRed - restPulseIncreasement;
-                tim3_ch1_pa6.SetPulse(calculatedPulseRed < restPulse ? restPulse : calculatedPulseRed);
+                tim3_ch1_pa6_left.SetPulse(calculatedPulseRed < restPulse ? restPulse : calculatedPulseRed);
                 const uint32_t calculatedPulseGreen = currentPulseRed - restPulseIncreasement;
-                tim3_ch2_pa7.SetPulse(calculatedPulseGreen < restPulse ? restPulse : calculatedPulseGreen);
+                tim3_ch2_pa7_right.SetPulse(calculatedPulseGreen < restPulse ? restPulse : calculatedPulseGreen);
             }
             else if (currentPulseRed < restPulse)
             {
                 const uint32_t calculatedPulseRed = currentPulseRed + restPulseIncreasement;
-                tim3_ch1_pa6.SetPulse(calculatedPulseRed > restPulse ? restPulse : calculatedPulseRed);
+                tim3_ch1_pa6_left.SetPulse(calculatedPulseRed > restPulse ? restPulse : calculatedPulseRed);
                 const uint32_t calculatedPulseGreen = currentPulseRed + restPulseIncreasement;
-                tim3_ch2_pa7.SetPulse(calculatedPulseGreen > restPulse ? restPulse : calculatedPulseGreen);
+                tim3_ch2_pa7_right.SetPulse(calculatedPulseGreen > restPulse ? restPulse : calculatedPulseGreen);
             }
         };
 
@@ -111,15 +113,15 @@ int main()
 
             if (readValue.value() == 'w')
             {
-                tim3_ch1_pa6.SetPulse(currentPulseRed + increasement);
-                tim3_ch2_pa7.SetPulse(currentPulseGreen + increasement);
+                tim3_ch1_pa6_left.SetPulse(currentPulseRed + increasement);
+                tim3_ch2_pa7_right.SetPulse(currentPulseGreen + increasement);
             }
             else if (readValue.value() == 's')
             {
                 const int32_t calculatedPulseRed = currentPulseRed - increasement;
-                tim3_ch1_pa6.SetPulse(calculatedPulseRed < minPulse ? minPulse : calculatedPulseRed);
+                tim3_ch1_pa6_left.SetPulse(calculatedPulseRed < minPulse ? minPulse : calculatedPulseRed);
                 const int32_t calculatedPulseGreen = currentPulseRed - increasement;
-                tim3_ch2_pa7.SetPulse(calculatedPulseGreen < minPulse ? minPulse : calculatedPulseGreen);
+                tim3_ch2_pa7_right.SetPulse(calculatedPulseGreen < minPulse ? minPulse : calculatedPulseGreen);
             }
             else
             {
@@ -182,8 +184,8 @@ int main()
     uart2.Init(uart2Tx, uart2Rx, 115200);
     ld2.Init();
 
-    tim3_ch1_pa6.Start();
-    tim3_ch2_pa7.Start();
+    tim3_ch1_pa6_left.Start();
+    tim3_ch2_pa7_right.Start();
 
     while (true)
     {

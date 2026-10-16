@@ -31,6 +31,7 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
         UART_RegisterLevel
         Devices
         Scheduler
+        WheelsController
 )
 
 configure_embedded_target(${CMAKE_PROJECT_NAME})
