@@ -44,3 +44,10 @@ void WheelsController::Accelerate(const Throttle throttleCommand)
         break;
     };
 }
+
+void WheelsController::Control(const Throttle throttleCommand)
+{
+    //TODO add steering control, right now only accelerate
+    Accelerate(throttleCommand);
+}
+

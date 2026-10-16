@@ -43,6 +43,7 @@ int main()
     
     volatile float temperature = 0.0f;
     volatile uint32_t pressure = 0;
+    WheelsController wheelsController{ tim3_ch1_pa6_left, tim3_ch2_pa7_right };
 
     Task<RegisterLevel::SoftwareTimer> readLPS25HBSensorTask{ 500, [&]()
     {
@@ -72,31 +73,9 @@ int main()
         ld2.Toggle();
     }};
 
-    Task<RegisterLevel::SoftwareTimer> ledControllerTask{ 10, [&]()
+    Task<RegisterLevel::SoftwareTimer> wheelsControllerTask{ 10, [&]()
     {
-        volatile const auto currentPulseRed = tim3_ch1_pa6_left.GetPulse();
-        volatile const auto currentPulseGreen = tim3_ch2_pa7_right.GetPulse();
         const auto readValue = uart1.Read();
-
-        auto ledControlFunction = [&]()
-        {
-            static constexpr uint32_t restPulse = 799;
-            static constexpr uint32_t restPulseIncreasement = 25;
-            if (currentPulseRed > restPulse)
-            {
-                const uint32_t calculatedPulseRed = currentPulseRed - restPulseIncreasement;
-                tim3_ch1_pa6_left.SetPulse(calculatedPulseRed < restPulse ? restPulse : calculatedPulseRed);
-                const uint32_t calculatedPulseGreen = currentPulseRed - restPulseIncreasement;
-                tim3_ch2_pa7_right.SetPulse(calculatedPulseGreen < restPulse ? restPulse : calculatedPulseGreen);
-            }
-            else if (currentPulseRed < restPulse)
-            {
-                const uint32_t calculatedPulseRed = currentPulseRed + restPulseIncreasement;
-                tim3_ch1_pa6_left.SetPulse(calculatedPulseRed > restPulse ? restPulse : calculatedPulseRed);
-                const uint32_t calculatedPulseGreen = currentPulseRed + restPulseIncreasement;
-                tim3_ch2_pa7_right.SetPulse(calculatedPulseGreen > restPulse ? restPulse : calculatedPulseGreen);
-            }
-        };
 
         // TODO:
         // add turning off option
@@ -108,30 +87,16 @@ int main()
 
         if (readValue)
         {
-            static constexpr int32_t minPulse = 0;
-            static constexpr uint32_t increasement = 100;
+            auto accelerateOption = Throttle::STOP;
 
             if (readValue.value() == 'w')
-            {
-                tim3_ch1_pa6_left.SetPulse(currentPulseRed + increasement);
-                tim3_ch2_pa7_right.SetPulse(currentPulseGreen + increasement);
-            }
+                accelerateOption = Throttle::FORWARD;
             else if (readValue.value() == 's')
-            {
-                const int32_t calculatedPulseRed = currentPulseRed - increasement;
-                tim3_ch1_pa6_left.SetPulse(calculatedPulseRed < minPulse ? minPulse : calculatedPulseRed);
-                const int32_t calculatedPulseGreen = currentPulseRed - increasement;
-                tim3_ch2_pa7_right.SetPulse(calculatedPulseGreen < minPulse ? minPulse : calculatedPulseGreen);
-            }
-            else
-            {
-                ledControlFunction();
-            }            
+                accelerateOption = Throttle::BACKWARD;
+
+            wheelsController.Control(accelerateOption);
         }
-        else
-        {
-            ledControlFunction();
-        }
+    
     }};
 
     std::optional<AccelerometerGyroSample> accelerometerGyro = std::nullopt;
@@ -173,7 +138,7 @@ int main()
     Scheduler<Task<RegisterLevel::SoftwareTimer>, 6> scheduler{ { readLPS25HBSensorTask
                                                       , printTemperaturePressureTask
                                                       , ld2Task
-                                                      , ledControllerTask
+                                                      , wheelsControllerTask
                                                       , readICM20948Accelerometer
                                                       , printAccelerometer } };
 

@@ -25,6 +25,6 @@ private:
 
 public:
     WheelsController(Peripherals::IPwm& left_, Peripherals::IPwm& right_);
-
+    void Control(const Throttle throttleCommand);
 
 };
