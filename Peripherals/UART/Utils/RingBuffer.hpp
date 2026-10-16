@@ -3,6 +3,9 @@
 #include <array>
 #include <optional>
 
+// TODO: move to cpp and separate lib
+// TODO: question - should uart depend on buffer itself??
+
 template<typename T, std::size_t BufferSize>
 class RingBuffer
 {
