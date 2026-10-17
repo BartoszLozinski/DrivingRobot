@@ -21,7 +21,13 @@ private:
     Peripherals::IPwm& left;
     Peripherals::IPwm& right;
 
-    void Accelerate(const Throttle throttleCommand);
+    static constexpr uint32_t IDLE_PULSE = 0;
+    static constexpr uint32_t PULSE_INCREASEMENT = 100;
+
+    void ThrottleControl(const Throttle throttleCommand);
+    void Backward(const uint32_t currentPulseLeft, const uint32_t currentPulseRight);
+    void Forward(const uint32_t currentPulseLeft, const uint32_t currentPulseRight);
+    void Idle(const uint32_t currentPulseLeft, const uint32_t currentPulseRight);
 
 public:
     WheelsController(Peripherals::IPwm& left_, Peripherals::IPwm& right_);
