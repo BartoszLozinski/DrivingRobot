@@ -73,10 +73,11 @@ int main()
         ld2.Toggle();
     }};
 
+    static uint32_t lastCommandMs = 0;
+    auto throttleOption = Throttle::STOP;
+
     Task<RegisterLevel::SoftwareTimer> wheelsControllerTask{ 10, [&]()
     {
-        const auto readValue = uart1.Read();
-
         // TODO:
         // add turning off option
         // and minimal pulse while turned on (simulation of not dropping too fast)
@@ -85,18 +86,27 @@ int main()
         // calculate arcs etc
         // remove adjust ledControlFunction, as idle state should aim to pulse = 0, instead of some value (customable)
 
-        if (readValue)
+        static constexpr uint32_t COMMAND_TIMEOUT_MS = 400;
+
+        if (const auto readValue = uart1.Read())
         {
-            auto accelerateOption = Throttle::STOP;
-
             if (readValue.value() == 'w')
-                accelerateOption = Throttle::FORWARD;
+            {
+                throttleOption = Throttle::FORWARD;
+                lastCommandMs = HAL_GetTick();
+            }
             else if (readValue.value() == 's')
-                accelerateOption = Throttle::BACKWARD;
-
-            wheelsController.Control(accelerateOption);
+            {
+                throttleOption = Throttle::BACKWARD;
+                lastCommandMs = HAL_GetTick();
+            }
         }
-    
+
+        if (HAL_GetTick() - lastCommandMs >= COMMAND_TIMEOUT_MS)
+            throttleOption = Throttle::STOP;
+
+        wheelsController.Control(throttleOption);
+
     }};
 
     std::optional<AccelerometerGyroSample> accelerometerGyro = std::nullopt;

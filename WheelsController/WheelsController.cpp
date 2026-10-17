@@ -25,10 +25,10 @@ void WheelsController::Forward(const uint32_t currentPulseLeft, const uint32_t c
 void WheelsController::Idle(const uint32_t currentPulseLeft, const uint32_t currentPulseRight)
 {
     // Controlling function - right now, same as Backward, as there is no reversion yet
-    static constexpr uint32_t PULSE_DECAY = 25; 
-    const uint32_t calculatedPulseLeft = (currentPulseLeft > PULSE_DECAY) ? (currentPulseLeft - PULSE_INCREASEMENT) : IDLE_PULSE;
+    static constexpr uint32_t PULSE_DECAY = 250; 
+    const uint32_t calculatedPulseLeft = (currentPulseLeft > PULSE_DECAY) ? (currentPulseLeft - PULSE_DECAY) : IDLE_PULSE;
     left.SetPulse(calculatedPulseLeft);
-    const uint32_t calculatedPulseRight = (currentPulseRight > PULSE_DECAY) ? (currentPulseRight - PULSE_INCREASEMENT) : IDLE_PULSE;
+    const uint32_t calculatedPulseRight = (currentPulseRight > PULSE_DECAY) ? (currentPulseRight - PULSE_DECAY) : IDLE_PULSE;
     right.SetPulse(calculatedPulseRight);
 }
 
