@@ -22,7 +22,7 @@ private:
     Peripherals::IPwm& right;
 
     static constexpr uint32_t IDLE_PULSE_PERCENT = 0;
-    static constexpr uint32_t PULSE_INCREASEMENT_PERCENT = 4;
+    static constexpr uint32_t PULSE_INCREASEMENT_PERCENT = 10;
 
     void ThrottleControl(const Throttle throttleCommand);
     void Backward(const uint32_t currentPulseLeft, const uint32_t currentPulseRight);

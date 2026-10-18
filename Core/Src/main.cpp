@@ -73,7 +73,7 @@ int main()
         ld2.Toggle();
     }};
 
-    static uint32_t lastCommandMs = 0;
+    //static uint32_t lastCommandMs = 0;
     auto throttleOption = Throttle::STOP;
 
     Task<RegisterLevel::SoftwareTimer> wheelsControllerTask{ 10, [&]()
@@ -88,24 +88,18 @@ int main()
 
         // TODO add keyboard tracking app, that sends command only when key pressed changes
         // instead of basing on terminal UART communication only
-        static constexpr uint32_t COMMAND_TIMEOUT_MS = 500;
+        //static constexpr uint32_t COMMAND_TIMEOUT_MS = 50;
 
+        // communication app needs to be used, so keyboard press/release will be recognized
         if (const auto readValue = uart1.Read())
         {
             if (readValue.value() == 'w')
-            {
                 throttleOption = Throttle::FORWARD;
-                lastCommandMs = HAL_GetTick();
-            }
             else if (readValue.value() == 's')
-            {
                 throttleOption = Throttle::BACKWARD;
-                lastCommandMs = HAL_GetTick();
-            }
+            else
+                throttleOption = Throttle::STOP;
         }
-
-        if (HAL_GetTick() - lastCommandMs >= COMMAND_TIMEOUT_MS)
-            throttleOption = Throttle::STOP;
 
         wheelsController.Control(throttleOption);
 

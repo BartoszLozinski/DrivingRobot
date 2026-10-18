@@ -1,7 +1,14 @@
-# simple uart send/receive app without sophisticated GUI,just to be able to enhance it with some gui one day
+# simple uart send/receive app without sophisticated GUI,just to be able to
+# enhance it with some gui one day
 # currently based on:
 # https://forbot.pl/forum/topic/17581-python-i-komunikacja-uart/
 
+# python3.12 -m venv .venv
+# source .venv/bin/activate
+# python -m pip install keyboard pyserial
+# sudo .venv/bin/python CommunicationApp/CommunicationApp.py
+
+import keyboard
 import serial
 import select
 import sys
@@ -17,12 +24,18 @@ def process_read():
         print(data)
 
 
-def process_keyboard():
-    if select.select([sys.stdin], [], [], 0)[0]:
-        line = sys.stdin.readline()
-        uartBT.write(line.encode())
+# TODO - async reading and writing, so could do it independently
+# TODO - wrap into classes
+# TODO - write gui for terminal read and controlling terminal
 
+def process_keyboard():
+    keyboard.on_press_key('w', lambda _: uartBT.write(b'w'))
+    keyboard.on_release_key('w', lambda _: uartBT.write(b'x'))
+    keyboard.on_press_key('s', lambda _: uartBT.write(b's'))
+    keyboard.on_release_key('s', lambda _: uartBT.write(b'x'))
+
+
+process_keyboard()
 
 while True:
     process_read()
-    process_keyboard()
