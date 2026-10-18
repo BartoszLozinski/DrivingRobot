@@ -21,13 +21,8 @@ private:
     Peripherals::IPwm& left;
     Peripherals::IPwm& right;
 
-    uint32_t leftMaxPulse{};
-    uint32_t rightMaxPulse{};
-
     static constexpr uint32_t IDLE_PULSE_PERCENT = 0;
     static constexpr uint32_t PULSE_INCREASEMENT_PERCENT = 4;
-
-
 
     void ThrottleControl(const Throttle throttleCommand);
     void Backward(const uint32_t currentPulseLeft, const uint32_t currentPulseRight);

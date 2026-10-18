@@ -3,8 +3,6 @@
 WheelsController::WheelsController(Peripherals::IPwm& left_, Peripherals::IPwm& right_)
     : left(left_)
     , right(right_)
-    , leftMaxPulse(left.GetMaxCounter())
-    , rightMaxPulse(right.GetMaxCounter())
 {};
 
 void WheelsController::Backward(const uint32_t currentPulseLeft, const uint32_t currentPulseRight)
@@ -34,14 +32,10 @@ void WheelsController::Idle(const uint32_t currentPulseLeft, const uint32_t curr
     right.SetPulse(calculatedPulseRight);
 }
 
-
 void WheelsController::ThrottleControl(const Throttle throttleCommand)
 {
-    // TODO update to operate on percentage, not pulse values
-
     volatile const auto currentPulseLeft = left.GetPulse();
     volatile const auto currentPulseRight = right.GetPulse();
-    [[maybe_unused]] volatile const auto maxPulse = left.GetMaxCounter();
 
     switch(throttleCommand)
     {
