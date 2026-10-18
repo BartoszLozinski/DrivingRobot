@@ -3,32 +3,34 @@
 WheelsController::WheelsController(Peripherals::IPwm& left_, Peripherals::IPwm& right_)
     : left(left_)
     , right(right_)
+    , leftMaxPulse(left.GetMaxCounter())
+    , rightMaxPulse(right.GetMaxCounter())
 {};
 
 void WheelsController::Backward(const uint32_t currentPulseLeft, const uint32_t currentPulseRight)
 {
-    const uint32_t calculatedPulseLeft = (currentPulseLeft > PULSE_INCREASEMENT) ? (currentPulseLeft - PULSE_INCREASEMENT) : IDLE_PULSE;
+    const uint32_t calculatedPulseLeft = (currentPulseLeft > PULSE_INCREASEMENT_PERCENT) ? (currentPulseLeft - PULSE_INCREASEMENT_PERCENT) : IDLE_PULSE_PERCENT;
     left.SetPulse(calculatedPulseLeft);
-    const uint32_t calculatedPulseRight = (currentPulseRight > PULSE_INCREASEMENT) ? (currentPulseRight - PULSE_INCREASEMENT) : IDLE_PULSE;
+    const uint32_t calculatedPulseRight = (currentPulseRight > PULSE_INCREASEMENT_PERCENT) ? (currentPulseRight - PULSE_INCREASEMENT_PERCENT) : IDLE_PULSE_PERCENT;
     right.SetPulse(calculatedPulseRight);
 }
 
 void WheelsController::Forward(const uint32_t currentPulseLeft, const uint32_t currentPulseRight)
 {
     // saturation inside SetPulse method
-    const uint32_t calculatedPulseLeft = currentPulseLeft + PULSE_INCREASEMENT;
+    const uint32_t calculatedPulseLeft = currentPulseLeft + PULSE_INCREASEMENT_PERCENT;
     left.SetPulse(calculatedPulseLeft);
-    const uint32_t calculatedPulseRight = currentPulseRight + PULSE_INCREASEMENT;
+    const uint32_t calculatedPulseRight = currentPulseRight + PULSE_INCREASEMENT_PERCENT;
     right.SetPulse(calculatedPulseRight);
 }
 
 void WheelsController::Idle(const uint32_t currentPulseLeft, const uint32_t currentPulseRight)
 {
     // Controlling function - right now, same as Backward, as there is no reversion yet
-    static constexpr uint32_t PULSE_DECAY = 250; 
-    const uint32_t calculatedPulseLeft = (currentPulseLeft > PULSE_DECAY) ? (currentPulseLeft - PULSE_DECAY) : IDLE_PULSE;
+    static constexpr uint32_t PULSE_DECAY_PERCENT = 10; 
+    const uint32_t calculatedPulseLeft = (currentPulseLeft > PULSE_DECAY_PERCENT) ? (currentPulseLeft - PULSE_DECAY_PERCENT) : IDLE_PULSE_PERCENT;
     left.SetPulse(calculatedPulseLeft);
-    const uint32_t calculatedPulseRight = (currentPulseRight > PULSE_DECAY) ? (currentPulseRight - PULSE_DECAY) : IDLE_PULSE;
+    const uint32_t calculatedPulseRight = (currentPulseRight > PULSE_DECAY_PERCENT) ? (currentPulseRight - PULSE_DECAY_PERCENT) : IDLE_PULSE_PERCENT;
     right.SetPulse(calculatedPulseRight);
 }
 

@@ -86,7 +86,9 @@ int main()
         // calculate arcs etc
         // remove adjust ledControlFunction, as idle state should aim to pulse = 0, instead of some value (customable)
 
-        static constexpr uint32_t COMMAND_TIMEOUT_MS = 400;
+        // TODO add keyboard tracking app, that sends command only when key pressed changes
+        // instead of basing on terminal UART communication only
+        static constexpr uint32_t COMMAND_TIMEOUT_MS = 500;
 
         if (const auto readValue = uart1.Read())
         {

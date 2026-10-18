@@ -34,6 +34,7 @@ namespace Peripherals
             void Start() override final;
             void Stop() override final;
             void SetPulse(const uint32_t pulse) override final;
+            void SetPulsePercent(const uint8_t pulsePercent) override final;
         };
     };
 }

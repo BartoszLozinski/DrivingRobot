@@ -41,6 +41,12 @@ namespace Peripherals
             __HAL_TIM_SET_COMPARE(&timer, channel, saturatedPulse);
         }
 
+        void Pwm::SetPulsePercent(const uint8_t pulsePercent)
+        {
+            const uint32_t calculatedPulse = pulsePercent >= 100 ? GetMaxCounter() : pulsePercent * GetMaxCounter() / 100;
+            __HAL_TIM_SET_COMPARE(&timer, channel, calculatedPulse);
+        }
+
         uint32_t Pwm::GetPulse() const
         {
             return __HAL_TIM_GET_COMPARE(&timer, channel);

@@ -27,5 +27,7 @@ namespace Peripherals
         virtual void Start() = 0;
         virtual void Stop() = 0;
         virtual void SetPulse(uint32_t pulse) = 0;
+        virtual void SetPulsePercent(const uint8_t pulsePercent) = 0;
+
     };
 };
