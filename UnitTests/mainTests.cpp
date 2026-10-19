@@ -3,6 +3,7 @@
 #include "RingBuffer_Tests.hpp"
 #include "LPS25HB_Tests.hpp"
 #include "ICM20948_Tests.hpp"
+#include "WheelsController_Tests.hpp"
 
 int main(int argc, char** argv)
 {
