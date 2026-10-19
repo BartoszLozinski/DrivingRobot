@@ -73,7 +73,6 @@ int main()
         ld2.Toggle();
     }};
 
-    //static uint32_t lastCommandMs = 0;
     auto throttleOption = Throttle::STOP;
 
     Task<RegisterLevel::SoftwareTimer> wheelsControllerTask{ 10, [&]()
@@ -84,25 +83,12 @@ int main()
         // TODO add simple simulator for wheels control (something reading angular velocity of wheels (percentage))
         // and plotting wheels position of both
         // calculate arcs etc
-        // remove adjust ledControlFunction, as idle state should aim to pulse = 0, instead of some value (customable)
-
-        // TODO add keyboard tracking app, that sends command only when key pressed changes
-        // instead of basing on terminal UART communication only
-        //static constexpr uint32_t COMMAND_TIMEOUT_MS = 50;
 
         // communication app needs to be used, so keyboard press/release will be recognized
         if (const auto readValue = uart1.Read())
-        {
-            if (readValue.value() == 'w')
-                throttleOption = Throttle::FORWARD;
-            else if (readValue.value() == 's')
-                throttleOption = Throttle::BACKWARD;
-            else
-                throttleOption = Throttle::STOP;
-        }
+            throttleOption = wheelsController.ParseControlOption(readValue.value());
 
         wheelsController.Control(throttleOption);
-
     }};
 
     std::optional<AccelerometerGyroSample> accelerometerGyro = std::nullopt;

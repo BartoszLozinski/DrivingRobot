@@ -22,15 +22,16 @@ private:
     Peripherals::IPwm& right;
 
     static constexpr uint32_t IDLE_PULSE_PERCENT = 0;
-    static constexpr uint32_t PULSE_INCREASEMENT_PERCENT = 10;
+    static constexpr uint32_t PULSE_INCREASEMENT_PERCENT = 2;
 
     void ThrottleControl(const Throttle throttleCommand);
-    void Backward(const uint32_t currentPulseLeft, const uint32_t currentPulseRight);
-    void Forward(const uint32_t currentPulseLeft, const uint32_t currentPulseRight);
-    void Idle(const uint32_t currentPulseLeft, const uint32_t currentPulseRight);
+    void Backward(const uint32_t currentPulseLeftPercent, const uint32_t currentPulseRightPercent);
+    void Forward(const uint32_t currentPulseLeftPercent, const uint32_t currentPulseRightPercent);
+    void Idle(const uint32_t currentPulseLeftPercent, const uint32_t currentPulseRightPercent);
 
 public:
     WheelsController(Peripherals::IPwm& left_, Peripherals::IPwm& right_);
+    Throttle ParseControlOption(const uint8_t controlChar) const;
     void Control(const Throttle throttleCommand);
 
 };
