@@ -9,7 +9,7 @@ TEST_F(WheelsControllerFixture, ThrottleControlForwardTest)
     EXPECT_CALL(leftPwmMock, SetPulsePercent(10 + PULSE_INCREASEMENT_PERCENT)).Times(1);
     EXPECT_CALL(rightPwmMock, SetPulsePercent(10 + PULSE_INCREASEMENT_PERCENT)).Times(1);
 
-    controller.Control(controller.ParseControlOption('w'));
+    controller.Control(controller.ParseThrottleControlOption('w'), controller.ParseSteeringControlOption('w'));
 };
 
 TEST_F(WheelsControllerFixture, ThrottleControlBackwardTest)
@@ -21,7 +21,7 @@ TEST_F(WheelsControllerFixture, ThrottleControlBackwardTest)
     EXPECT_CALL(leftPwmMock, SetPulsePercent(10 - PULSE_INCREASEMENT_PERCENT)).Times(1);
     EXPECT_CALL(rightPwmMock, SetPulsePercent(10 - PULSE_INCREASEMENT_PERCENT)).Times(1);
 
-    controller.Control(controller.ParseControlOption('s'));
+    controller.Control(controller.ParseThrottleControlOption('s'), controller.ParseSteeringControlOption('s'));
 };
 
 TEST_F(WheelsControllerFixture, ThrottleControlIdleTest)
@@ -33,5 +33,5 @@ TEST_F(WheelsControllerFixture, ThrottleControlIdleTest)
     EXPECT_CALL(leftPwmMock, SetPulsePercent(10 - PULSE_DECAY_PERCENT)).Times(1);
     EXPECT_CALL(rightPwmMock, SetPulsePercent(10 - PULSE_DECAY_PERCENT)).Times(1);
 
-    controller.Control(controller.ParseControlOption('x'));
+    controller.Control(controller.ParseThrottleControlOption('x'), controller.ParseSteeringControlOption('x'));
 };

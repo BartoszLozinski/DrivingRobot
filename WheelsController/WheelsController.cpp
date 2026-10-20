@@ -20,10 +20,10 @@ void WheelsController::Backward(const uint32_t currentPulseLeftPercent, const ui
     right.SetPulsePercent(calculatedPulseRight);
 }
 
-void WheelsController::Control(const Throttle throttleCommand)
+void WheelsController::Control(const Throttle throttleCommand, const Steering steeringCommand)
 {
-    //TODO add steering control, right now only accelerate
     ThrottleControl(throttleCommand);
+    SteeringControl(steeringCommand);
 }
 
 void WheelsController::Forward(const uint32_t currentPulseLeftPercent, const uint32_t currentPulseRightPercent)
@@ -52,11 +52,31 @@ void WheelsController::Idle(const uint32_t currentPulseLeftPercent, const uint32
     right.SetPulsePercent(calculatedPulseRight);
 }
 
-Throttle WheelsController::ParseControlOption(const uint8_t controlChar) const
+void WheelsController::Left(const uint32_t currentPulseRightPercent)
 {
+    right.SetPulsePercent(currentPulseRightPercent + STEERING_PULSE_DIFFERENCE_PERCENT);
+}
+
+void WheelsController::Right(const uint32_t currentPulseLeftPercent)
+{
+    left.SetPulsePercent(currentPulseLeftPercent + STEERING_PULSE_DIFFERENCE_PERCENT);
+}
+
+void WheelsController::Straight(const uint32_t currentPulseLeftPercent, const uint32_t currentPulseRightPercent)
+{
+    const auto pulseOfBoth = currentPulseLeftPercent > currentPulseRightPercent ? currentPulseRightPercent : currentPulseLeftPercent;
+    left.SetPulsePercent(pulseOfBoth);
+    right.SetPulsePercent(pulseOfBoth);
+}
+
+Throttle WheelsController::ParseThrottleControlOption(const uint8_t controlChar) const
+{
+    //for now only steering forward
     switch(controlChar)
     {
     case 'w':
+    case 'L':
+    case 'R':
         return Throttle::FORWARD;
     case 's':
         return Throttle::BACKWARD;
@@ -64,6 +84,22 @@ Throttle WheelsController::ParseControlOption(const uint8_t controlChar) const
         return Throttle::STOP;
     }
 }
+
+Steering WheelsController::ParseSteeringControlOption(const uint8_t controlChar) const
+{
+    switch(controlChar)
+    {
+    case 'l':
+    case 'L':
+        return Steering::LEFT;
+    case 'r':
+    case 'R':
+        return Steering::RIGHT;
+    default:
+        return Steering::STRAIGHT;
+    }
+}
+
 
 void WheelsController::ThrottleControl(const Throttle throttleCommand)
 {
@@ -84,6 +120,31 @@ void WheelsController::ThrottleControl(const Throttle throttleCommand)
         break;
     case FORWARD:
         Forward(currentPulseLeftPercent, currentPulseRightPercent);
+        break;
+    default:
+        break;
+    };
+}
+
+void WheelsController::SteeringControl(const Steering steeringCommand)
+{
+    const auto maxPulseLeft = left.GetMaxCounter();
+    const auto maxPulseRight = right.GetMaxCounter();
+    volatile const auto currentPulseLeftPercent = left.GetPulse() * 100 / maxPulseLeft;
+    volatile const auto currentPulseRightPercent = right.GetPulse() * 100 / maxPulseRight;
+
+    switch(steeringCommand)
+    {
+    using enum Steering;
+    case LEFT:
+        //No reversion yet
+        Left(currentPulseRightPercent);
+        break;
+    case RIGHT:
+        Right(currentPulseLeftPercent);
+        break;
+    case STRAIGHT:
+        Straight(currentPulseLeftPercent, currentPulseRightPercent);
         break;
     default:
         break;

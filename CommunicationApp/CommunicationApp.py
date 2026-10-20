@@ -29,10 +29,39 @@ def process_read():
 # TODO - write gui for terminal read and controlling terminal
 
 def process_keyboard():
-    keyboard.on_press_key('w', lambda _: uartBT.write(b'w'))
-    keyboard.on_release_key('w', lambda _: uartBT.write(b'x'))
-    keyboard.on_press_key('s', lambda _: uartBT.write(b's'))
-    keyboard.on_release_key('s', lambda _: uartBT.write(b'x'))
+    pressed_keys = []
+    current_command = b'x'
+
+    def update_command():
+        nonlocal current_command
+        if 'w' in pressed_keys and 'a' in pressed_keys:
+            command = b'L'
+        elif 'w' in pressed_keys and 'd' in pressed_keys:
+            command = b'R'
+        elif 'w' in pressed_keys:
+            command = b'w'
+        elif 's' in pressed_keys:
+            command = b's'
+        else:
+            command = b'x'
+
+        if command != current_command:
+            uartBT.write(command)
+            current_command = command
+
+    def on_press(key):
+        if key not in pressed_keys:
+            pressed_keys.append(key)
+        update_command()
+
+    def on_release(key):
+        if key in pressed_keys:
+            pressed_keys.remove(key)
+        update_command()
+
+    for key in ('w', 'a', 'd', 's'):
+        keyboard.on_press_key(key, lambda _, key=key: on_press(key))
+        keyboard.on_release_key(key, lambda _, key=key: on_release(key))
 
 
 process_keyboard()
