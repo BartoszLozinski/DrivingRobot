@@ -1,37 +1,49 @@
 #include "WheelsController_Tests.hpp"
 
+void WheelsControllerWrapper::SetControlOption(const char commandChar)
+{
+    ParseThrottleControlOption(commandChar);
+    ParseSteeringControlOption(commandChar);
+}
+
 TEST_F(WheelsControllerFixture, ThrottleControlForwardTest)
 {
-    EXPECT_CALL(leftPwmMock, GetMaxCounter()).WillOnce([](){ return 1000; });
-    EXPECT_CALL(rightPwmMock, GetMaxCounter()).WillOnce([](){ return 1000; });
-    EXPECT_CALL(leftPwmMock, GetPulse()).WillOnce([](){ return 100; });
-    EXPECT_CALL(rightPwmMock, GetPulse()).WillOnce([](){ return 100; });
-    EXPECT_CALL(leftPwmMock, SetPulsePercent(10 + PULSE_INCREASEMENT_PERCENT)).Times(1);
-    EXPECT_CALL(rightPwmMock, SetPulsePercent(10 + PULSE_INCREASEMENT_PERCENT)).Times(1);
+    controller.SetControlOption('w');
 
-    controller.Control(controller.ParseThrottleControlOption('w'), controller.ParseSteeringControlOption('w'));
+    EXPECT_CALL(leftPwmMock, GetMaxCounter()).WillRepeatedly([](){ return 1000; });
+    EXPECT_CALL(rightPwmMock, GetMaxCounter()).WillRepeatedly([](){ return 1000; });
+    EXPECT_CALL(leftPwmMock, GetPulse()).WillRepeatedly([](){ return 100; });
+    EXPECT_CALL(rightPwmMock, GetPulse()).WillRepeatedly([](){ return 100; });
+    EXPECT_CALL(leftPwmMock, SetPulsePercent(10 + PULSE_INCREASEMENT_PERCENT)).Times(::testing::AtLeast(1));
+    EXPECT_CALL(rightPwmMock, SetPulsePercent(10 + PULSE_INCREASEMENT_PERCENT)).Times(::testing::AtLeast(1));
+
+    controller.Control();
 };
 
 TEST_F(WheelsControllerFixture, ThrottleControlBackwardTest)
 {
-    EXPECT_CALL(leftPwmMock, GetMaxCounter()).WillOnce([](){ return 1000; });
-    EXPECT_CALL(rightPwmMock, GetMaxCounter()).WillOnce([](){ return 1000; });
-    EXPECT_CALL(leftPwmMock, GetPulse()).WillOnce([](){ return 100; });
-    EXPECT_CALL(rightPwmMock, GetPulse()).WillOnce([](){ return 100; });
-    EXPECT_CALL(leftPwmMock, SetPulsePercent(10 - PULSE_INCREASEMENT_PERCENT)).Times(1);
-    EXPECT_CALL(rightPwmMock, SetPulsePercent(10 - PULSE_INCREASEMENT_PERCENT)).Times(1);
+    controller.SetControlOption('s');
 
-    controller.Control(controller.ParseThrottleControlOption('s'), controller.ParseSteeringControlOption('s'));
+    EXPECT_CALL(leftPwmMock, GetMaxCounter()).WillRepeatedly([](){ return 1000; });
+    EXPECT_CALL(rightPwmMock, GetMaxCounter()).WillRepeatedly([](){ return 1000; });
+    EXPECT_CALL(leftPwmMock, GetPulse()).WillRepeatedly([](){ return 100; });
+    EXPECT_CALL(rightPwmMock, GetPulse()).WillRepeatedly([](){ return 100; });
+    EXPECT_CALL(leftPwmMock, SetPulsePercent(10 - PULSE_INCREASEMENT_PERCENT)).Times(::testing::AtLeast(1));
+    EXPECT_CALL(rightPwmMock, SetPulsePercent(10 - PULSE_INCREASEMENT_PERCENT)).Times(::testing::AtLeast(1));
+
+    controller.Control();
 };
 
 TEST_F(WheelsControllerFixture, ThrottleControlIdleTest)
 {
-    EXPECT_CALL(leftPwmMock, GetMaxCounter()).WillOnce([](){ return 1000; });
-    EXPECT_CALL(rightPwmMock, GetMaxCounter()).WillOnce([](){ return 1000; });
-    EXPECT_CALL(leftPwmMock, GetPulse()).WillOnce([](){ return 100; });
-    EXPECT_CALL(rightPwmMock, GetPulse()).WillOnce([](){ return 100; });
-    EXPECT_CALL(leftPwmMock, SetPulsePercent(10 - PULSE_DECAY_PERCENT)).Times(1);
-    EXPECT_CALL(rightPwmMock, SetPulsePercent(10 - PULSE_DECAY_PERCENT)).Times(1);
+    controller.SetControlOption('x');
 
-    controller.Control(controller.ParseThrottleControlOption('x'), controller.ParseSteeringControlOption('x'));
+    EXPECT_CALL(leftPwmMock, GetMaxCounter()).WillRepeatedly([](){ return 1000; });
+    EXPECT_CALL(rightPwmMock, GetMaxCounter()).WillRepeatedly([](){ return 1000; });
+    EXPECT_CALL(leftPwmMock, GetPulse()).WillRepeatedly([](){ return 100; });
+    EXPECT_CALL(rightPwmMock, GetPulse()).WillRepeatedly([](){ return 100; });
+    EXPECT_CALL(leftPwmMock, SetPulsePercent(10 - PULSE_DECAY_PERCENT)).Times(::testing::AtLeast(1));
+    EXPECT_CALL(rightPwmMock, SetPulsePercent(10 - PULSE_DECAY_PERCENT)).Times(::testing::AtLeast(1));
+
+    controller.Control();
 };

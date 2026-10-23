@@ -73,9 +73,6 @@ int main()
         ld2.Toggle();
     }};
 
-    auto throttleOption = Throttle::STOP;
-    auto steeringOption = Steering::STRAIGHT;
-
     Task<RegisterLevel::SoftwareTimer> wheelsControllerTask{ 10, [&]()
     {
         // TODO:
@@ -88,11 +85,11 @@ int main()
         // communication app needs to be used, so keyboard press/release will be recognized
         if (const auto readValue = uart1.Read())
         {
-            throttleOption = wheelsController.ParseThrottleControlOption(readValue.value());
-            steeringOption = wheelsController.ParseSteeringControlOption(readValue.value());
+            wheelsController.ParseThrottleControlOption(readValue.value());
+            wheelsController.ParseSteeringControlOption(readValue.value());
         }
 
-        wheelsController.Control(throttleOption, steeringOption);
+        wheelsController.Control();
     }};
 
     std::optional<AccelerometerGyroSample> accelerometerGyro = std::nullopt;

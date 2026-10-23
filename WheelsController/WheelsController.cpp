@@ -5,34 +5,64 @@ WheelsController::WheelsController(Peripherals::IPwm& left_, Peripherals::IPwm& 
     , right(right_)
 {};
 
-void WheelsController::Backward(const uint32_t currentPulseLeftPercent, const uint32_t currentPulseRightPercent)
+void WheelsController::Control()
 {
-    const uint32_t calculatedPulseLeft = (currentPulseLeftPercent > PULSE_INCREASEMENT_PERCENT)
-                                       ? (currentPulseLeftPercent - PULSE_INCREASEMENT_PERCENT)
-                                       : IDLE_PULSE_PERCENT;
+    const auto maxPulseLeft = left.GetMaxCounter();
+    const auto maxPulseRight = right.GetMaxCounter();
+    volatile const auto currentPulseLeftPercent = left.GetPulse() * 100 / maxPulseLeft;
+    volatile const auto currentPulseRightPercent = right.GetPulse() * 100 / maxPulseRight;
 
-    left.SetPulsePercent(calculatedPulseLeft);
+    const uint8_t steeringCommandMaxPulseSwitch = (steeringCommand == Steering::STRAIGHT) ? 0 : 1;
+    const uint8_t throttleCommandMaxPulseSwitch = (throttleCommand == Throttle::IDLE) ? 0 : 1;
 
-    const uint32_t calculatedPulseRight = (currentPulseRightPercent > PULSE_INCREASEMENT_PERCENT)
-                                        ? (currentPulseRightPercent - PULSE_INCREASEMENT_PERCENT)
-                                        : IDLE_PULSE_PERCENT;
+    // todo steering backward left/right
+    switch(steeringCommand)
+    {
+    using enum Steering;
+    case LEFT:
+        left.SetPulsePercent(GetSaturatedPulseIncreasement(currentPulseLeftPercent, throttleCommandMaxPulseSwitch * MAX_STRAIGHT_PERCENT_PULSE));
+        right.SetPulsePercent(GetSaturatedPulseIncreasement(currentPulseRightPercent, throttleCommandMaxPulseSwitch * MAX_STRAIGHT_PERCENT_PULSE +
+                                                                                      steeringCommandMaxPulseSwitch * STEERING_PULSE_DIFFERENCE_PERCENT));
+ 
+        break;
+    case RIGHT:
+        left.SetPulsePercent(GetSaturatedPulseIncreasement(currentPulseLeftPercent, throttleCommandMaxPulseSwitch * MAX_STRAIGHT_PERCENT_PULSE +
+                                                                                    steeringCommandMaxPulseSwitch * STEERING_PULSE_DIFFERENCE_PERCENT));
+        right.SetPulsePercent(GetSaturatedPulseIncreasement(currentPulseRightPercent, throttleCommandMaxPulseSwitch * MAX_STRAIGHT_PERCENT_PULSE));
 
-    right.SetPulsePercent(calculatedPulseRight);
+        break;
+    case STRAIGHT:
+        if (throttleCommand == Throttle::FORWARD)
+        {
+            left.SetPulsePercent(GetSaturatedPulseIncreasement(currentPulseLeftPercent, throttleCommandMaxPulseSwitch * MAX_STRAIGHT_PERCENT_PULSE));
+            right.SetPulsePercent(GetSaturatedPulseIncreasement(currentPulseRightPercent, throttleCommandMaxPulseSwitch * MAX_STRAIGHT_PERCENT_PULSE));
+        }
+        else if (throttleCommand == Throttle::BACKWARD)
+        {
+            left.SetPulsePercent(GetSaturatedPulseDecreasement(currentPulseLeftPercent));
+            right.SetPulsePercent(GetSaturatedPulseDecreasement(currentPulseRightPercent));
+        }
+        else
+        {
+            Idle(currentPulseLeftPercent, currentPulseRightPercent);
+        }
+        break;
+    default:
+        break;
+    };
 }
 
-void WheelsController::Control(const Throttle throttleCommand, const Steering steeringCommand)
+uint8_t WheelsController::GetSaturatedPulseDecreasement(const uint8_t currentPulsePercent)
 {
-    ThrottleControl(throttleCommand);
-    SteeringControl(steeringCommand);
+    return (currentPulsePercent > PULSE_INCREASEMENT_PERCENT) ?
+           (currentPulsePercent - PULSE_INCREASEMENT_PERCENT) :
+           IDLE_PULSE_PERCENT;
 }
 
-void WheelsController::Forward(const uint32_t currentPulseLeftPercent, const uint32_t currentPulseRightPercent)
+uint8_t WheelsController::GetSaturatedPulseIncreasement(const uint8_t currentPulsePercent, const uint8_t maxPulse)
 {
-    // saturation inside SetPulse method
-    const uint32_t calculatedPulseLeft = currentPulseLeftPercent + PULSE_INCREASEMENT_PERCENT;
-    left.SetPulsePercent(calculatedPulseLeft);
-    const uint32_t calculatedPulseRight = currentPulseRightPercent + PULSE_INCREASEMENT_PERCENT;
-    right.SetPulsePercent(calculatedPulseRight);
+    const uint32_t calculatedPulse = currentPulsePercent + PULSE_INCREASEMENT_PERCENT;
+    return (calculatedPulse > maxPulse ? maxPulse : calculatedPulse);
 }
 
 void WheelsController::Idle(const uint32_t currentPulseLeftPercent, const uint32_t currentPulseRightPercent)
@@ -52,24 +82,7 @@ void WheelsController::Idle(const uint32_t currentPulseLeftPercent, const uint32
     right.SetPulsePercent(calculatedPulseRight);
 }
 
-void WheelsController::Left(const uint32_t currentPulseRightPercent)
-{
-    right.SetPulsePercent(currentPulseRightPercent + STEERING_PULSE_DIFFERENCE_PERCENT);
-}
-
-void WheelsController::Right(const uint32_t currentPulseLeftPercent)
-{
-    left.SetPulsePercent(currentPulseLeftPercent + STEERING_PULSE_DIFFERENCE_PERCENT);
-}
-
-void WheelsController::Straight(const uint32_t currentPulseLeftPercent, const uint32_t currentPulseRightPercent)
-{
-    const auto pulseOfBoth = currentPulseLeftPercent > currentPulseRightPercent ? currentPulseRightPercent : currentPulseLeftPercent;
-    left.SetPulsePercent(pulseOfBoth);
-    right.SetPulsePercent(pulseOfBoth);
-}
-
-Throttle WheelsController::ParseThrottleControlOption(const uint8_t controlChar) const
+void WheelsController::ParseThrottleControlOption(const uint8_t controlChar)
 {
     //for now only steering forward
     switch(controlChar)
@@ -77,76 +90,31 @@ Throttle WheelsController::ParseThrottleControlOption(const uint8_t controlChar)
     case 'w':
     case 'L':
     case 'R':
-        return Throttle::FORWARD;
+        throttleCommand = Throttle::FORWARD;
+        break;
     case 's':
-        return Throttle::BACKWARD;
+        throttleCommand = Throttle::BACKWARD;
+        break;
     default:
-        return Throttle::STOP;
+        throttleCommand = Throttle::IDLE;
+        break;
     }
 }
 
-Steering WheelsController::ParseSteeringControlOption(const uint8_t controlChar) const
+void WheelsController::ParseSteeringControlOption(const uint8_t controlChar)
 {
     switch(controlChar)
     {
     case 'l':
     case 'L':
-        return Steering::LEFT;
+        steeringCommand = Steering::LEFT;
+        break;
     case 'r':
     case 'R':
-        return Steering::RIGHT;
+        steeringCommand = Steering::RIGHT;
+        break;
     default:
-        return Steering::STRAIGHT;
+        steeringCommand = Steering::STRAIGHT;
+        break;
     }
-}
-
-
-void WheelsController::ThrottleControl(const Throttle throttleCommand)
-{
-    const auto maxPulseLeft = left.GetMaxCounter();
-    const auto maxPulseRight = right.GetMaxCounter();
-    volatile const auto currentPulseLeftPercent = left.GetPulse() * 100 / maxPulseLeft;
-    volatile const auto currentPulseRightPercent = right.GetPulse() * 100 / maxPulseRight;
-
-    switch(throttleCommand)
-    {
-    using enum Throttle;
-    case BACKWARD:
-        //No reversion yet
-        Backward(currentPulseLeftPercent, currentPulseRightPercent);
-        break;
-    case STOP:
-        Idle(currentPulseLeftPercent, currentPulseRightPercent);
-        break;
-    case FORWARD:
-        Forward(currentPulseLeftPercent, currentPulseRightPercent);
-        break;
-    default:
-        break;
-    };
-}
-
-void WheelsController::SteeringControl(const Steering steeringCommand)
-{
-    const auto maxPulseLeft = left.GetMaxCounter();
-    const auto maxPulseRight = right.GetMaxCounter();
-    volatile const auto currentPulseLeftPercent = left.GetPulse() * 100 / maxPulseLeft;
-    volatile const auto currentPulseRightPercent = right.GetPulse() * 100 / maxPulseRight;
-
-    switch(steeringCommand)
-    {
-    using enum Steering;
-    case LEFT:
-        //No reversion yet
-        Left(currentPulseRightPercent);
-        break;
-    case RIGHT:
-        Right(currentPulseLeftPercent);
-        break;
-    case STRAIGHT:
-        Straight(currentPulseLeftPercent, currentPulseRightPercent);
-        break;
-    default:
-        break;
-    };
 }

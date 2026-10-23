@@ -10,8 +10,6 @@
 
 import keyboard
 import serial
-import select
-import sys
 
 uartDebug = serial.Serial("/dev/ttyACM1", 115200, timeout=0.1)
 uartBT = serial.Serial("/dev/rfcomm0", 9600, timeout=0.1)
@@ -42,6 +40,10 @@ def process_keyboard():
             command = b'w'
         elif 's' in pressed_keys:
             command = b's'
+        elif 'a' in pressed_keys:
+            command = b'l'
+        elif 'd' in pressed_keys:
+            command = b'r'
         else:
             command = b'x'
 
