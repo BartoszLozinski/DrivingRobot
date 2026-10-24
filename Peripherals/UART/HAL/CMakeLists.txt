@@ -4,8 +4,7 @@ set(${target_name}_src  UartIT.cpp
 )
 
 
-set(${target_name}_hpp  ../LineParser.hpp
-                        ../Utils/RingBuffer.hpp
+set(${target_name}_hpp  ../Utils/RingBuffer.hpp
                         Uart.hpp
                         UartIT.hpp
 )

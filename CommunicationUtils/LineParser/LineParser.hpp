@@ -5,20 +5,20 @@
 #include <span>
 
 template<typename T>
-concept UartConcept = requires(T& uart)
+concept ByteReaderConcept = requires(T& byteReader)
 {
-    { uart.Read() } -> std::same_as<std::optional<uint8_t>>;
+    { byteReader.Read() } -> std::same_as<std::optional<uint8_t>>;
 };
 
 //TODO separate frmo uart - depend only on the ring buffer
 
 namespace UcCommunication
 {
-    template<UartConcept UartT, std::size_t BufferSize = 64>
+    template<ByteReaderConcept ByteReaderT, std::size_t BufferSize = 64>
     class LineParser
     {
     private:
-        UartT& uart;
+        ByteReaderT& byteReader;
         std::array<uint8_t, BufferSize> lineBuffer{};
         std::size_t lineIndex{ 0 };
 
@@ -28,13 +28,13 @@ namespace UcCommunication
         }
 
     public:
-        explicit LineParser(UartT& uart_)
-            : uart(uart_)
+        explicit LineParser(ByteReaderT& byteReader_)
+            : byteReader(byteReader_)
         {}
 
         std::optional<std::span<const uint8_t>> ReadLine()
         {
-            while (auto byteOpt = uart.Read())
+            while (auto byteOpt = byteReader.Read())
             {
                 const uint8_t byte = static_cast<uint8_t>(*byteOpt);
 
