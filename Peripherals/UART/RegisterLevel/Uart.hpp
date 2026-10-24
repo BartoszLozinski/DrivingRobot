@@ -1,5 +1,5 @@
 #pragma once
-//TO connect with you linux terminal (for example at ubuntu)
+// TO connect with you linux terminal (for example on ubuntu)
 //
 // check tty com ports with
 // dmesg | grep tty 		(or sudo if not allow due to reading the kernel buffer failed: Operation not permitted)
@@ -19,14 +19,12 @@
 
 #include "Interfaces/IUart.hpp"
 #include "UartBase.hpp"
-#include "Utils/RingBuffer.hpp"
+#include "CommunicationUtils/RingBuffer/RingBuffer.hpp"
 
 namespace Peripherals
 {
     namespace RegisterLevel
     {
-        // TODO: move to cpp and export quantizied buffer sizes?
-
         template< std::size_t bufferSize = 64>
         class Uart : public IUart
                    , public UartBase<USART_TypeDef, bufferSize>
@@ -63,12 +61,12 @@ namespace Peripherals
                 EnableRxInterrupt();
             }
 
-            std::optional<uint8_t> Read() override
+            std::optional<uint8_t> Read() override final
             {
                 return rxBuffer.Pop();
             }
 
-            void Transmit(const uint8_t* data, std::size_t size) override
+            void Transmit(const uint8_t* data, std::size_t size) override final
             {
                 for (std::size_t i = 0; i < size; ++i)
                 {

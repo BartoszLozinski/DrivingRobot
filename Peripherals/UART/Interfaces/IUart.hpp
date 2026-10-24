@@ -6,6 +6,7 @@
 
 namespace Peripherals
 {
+    //TODO add IUart_IT interface
     class IUart
     {
     public:

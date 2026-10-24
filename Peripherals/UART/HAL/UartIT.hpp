@@ -1,7 +1,7 @@
 #pragma once
 
 #include "IUart.hpp"
-#include "Utils/RingBuffer.hpp"
+#include "CommunicationUtils/RingBuffer/RingBuffer.hpp"
 
 extern "C"
 {

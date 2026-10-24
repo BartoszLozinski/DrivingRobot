@@ -33,6 +33,7 @@ cmake_path(GET CMAKE_CURRENT_SOURCE_DIR PARENT_PATH parent_dir)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../Devices ${CMAKE_CURRENT_BINARY_DIR}/Devices)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../WheelsController ${CMAKE_CURRENT_BINARY_DIR}/WheelsController)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../CommunicationUtils/LineParser ${CMAKE_CURRENT_BINARY_DIR}/LineParser)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../CommunicationUtils/RingBuffer ${CMAKE_CURRENT_BINARY_DIR}/RingBuffer)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../Peripherals/Timer/Interfaces ${CMAKE_CURRENT_BINARY_DIR}/TimerInterfaces)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../Peripherals/I2C/Interfaces ${CMAKE_CURRENT_BINARY_DIR}/I2CInterfaces)
 
@@ -55,7 +56,8 @@ target_link_libraries(${PROJECT_NAME}
         Devices
         WheelsController
     INTERFACE
-        CommunicationUtils
+        LineParser
+        RingBuffer
         TimerInterfaces
         I2CInterfaces
 )

@@ -4,8 +4,7 @@ set(${target_name}_src  UartIT.cpp
 )
 
 
-set(${target_name}_hpp  ../Utils/RingBuffer.hpp
-                        Uart.hpp
+set(${target_name}_hpp  Uart.hpp
                         UartIT.hpp
 )
 
@@ -22,4 +21,5 @@ configure_HAL_target(${target_name}
 
 target_link_libraries(${target_name}
     INTERFACE
+        RingBuffer
         UartInterfaces)
