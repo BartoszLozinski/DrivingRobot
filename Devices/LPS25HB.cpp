@@ -2,7 +2,7 @@
 
 namespace Device
 {
-    LPS25HB::LPS25HB(Peripherals::I2CBase& i2c_) : i2c(i2c_) {}
+    LPS25HB::LPS25HB(Peripherals::I2CInterface& i2c_) : i2c(i2c_) {}
 
     void LPS25HB::WriteRegister(const uint8_t reg, uint8_t value)
     {

@@ -26,9 +26,7 @@ namespace Device
             static constexpr uint16_t CTRL_REG1_ODR1 = 0x20;
             static constexpr uint16_t CTRL_REG1_ODR0 = 0x10;
         };
-
-        static constexpr uint8_t addressOffset = 1; // STM32 HAL library uses 8-bit address, so we need to shift the 7-bit address by 1 to the left
-        
+       
         static constexpr uint8_t AUTO_INCREMENT = 0x80; //TEMP_OUT_L and TEMP_OUT_H are in sequence, so we can read them in one go by setting the auto-increment bit
                                                         //PRESS_OUT_XL, PRESS_OUT_L, and PRESS_OUT_H are in sequence, so we can read them in one go by setting the auto-increment bit
         [[nodiscard]] float RecalculateRawTemperature(const int16_t rawTemperature) const;

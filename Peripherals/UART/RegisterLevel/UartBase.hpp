@@ -15,7 +15,7 @@
 //
 // try once more
 
-#include "../../Config.hpp"
+#include "Config/Config.hpp"
 #include <stm32l476xx.h>
 #include <array>
 #include <concepts>

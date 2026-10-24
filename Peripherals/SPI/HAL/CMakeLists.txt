@@ -3,8 +3,7 @@ set(target_name SPI_HAL)
 set(${target_name}_src  Spi.cpp
 )
 
-set(${target_name}_hpp  ../ISpi.hpp
-                        Spi.hpp
+set(${target_name}_hpp  Spi.hpp
 )
 
 configure_library(${target_name}
@@ -14,3 +13,8 @@ configure_library(${target_name}
 
 configure_embedded_target(${target_name})
 configure_HAL_target(${target_name})
+
+target_link_libraries(${target_name}
+    INTERFACE
+        SpiInterfaces
+)

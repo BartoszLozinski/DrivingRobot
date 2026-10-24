@@ -2,10 +2,10 @@
 
 namespace Peripherals
 {
-    enum class GpioOutputState
+    enum class GpioState
     {
-        Set,
-        Reset,
+        Low = 0,
+        High = 1,
     };
 
     class IGpioOutput
@@ -14,7 +14,7 @@ namespace Peripherals
         virtual void Set() = 0;
         virtual void Clear() = 0;
         virtual void Toggle() = 0;
-        virtual GpioOutputState GetState() const = 0;
+        virtual GpioState GetState() const = 0;
 
         virtual ~IGpioOutput() = default;
     };

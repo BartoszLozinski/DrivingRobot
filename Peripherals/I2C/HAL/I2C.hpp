@@ -1,5 +1,5 @@
 #pragma once
-#include "I2CBase.hpp"
+#include "Interfaces/I2CInterface.hpp"
 
 extern "C"
 {
@@ -10,9 +10,11 @@ namespace Peripherals
 {
     namespace HAL
     {
-        class I2C : public I2CBase
+        class I2C : public I2CInterface
         {
         private:
+            static constexpr uint8_t addressOffset = 1; // STM32 HAL library uses 8-bit address, so we need to shift the 7-bit address by 1 to the left
+
             I2C_HandleTypeDef& i2cHandle;
             uint32_t timeOut{ HAL_MAX_DELAY };
 

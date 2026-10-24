@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ICM20948Base.hpp"
-#include "Peripherals/I2C/I2CBase.hpp"
+#include "Peripherals/I2C/Interfaces/I2CInterface_IT.hpp"
 #include "type_traits"
 
 struct AccelerometerGyroSample
@@ -76,7 +76,7 @@ namespace Device
             USER_BANK_3 = 0b11,
         };
 
-        Peripherals::I2CBase_IT& i2c;
+        Peripherals::I2CInterface_IT& i2c;
         State state = State::Idle;
         ICM20948::AccelerometerSensitivity accSensitivity = ICM20948::AccelerometerSensitivity::g2;
         ICM20948::GyroscopeSensitivity gyroSensitivity = ICM20948::GyroscopeSensitivity::dps250;
@@ -126,7 +126,7 @@ namespace Device
         }
 
     public:
-        ICM20948_Async(Peripherals::I2CBase_IT& i2c_);
+        ICM20948_Async(Peripherals::I2CInterface_IT& i2c_);
 
         [[nodiscard]] bool IsReady() const;
         void WakeUp() override;

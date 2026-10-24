@@ -1,4 +1,4 @@
-#include "TimerInterfaces/InputCaptureInterface.hpp"
+#include "Interfaces/InputCaptureInterface.hpp"
 
 extern "C"
 {

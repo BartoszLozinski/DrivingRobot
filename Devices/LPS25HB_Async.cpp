@@ -2,7 +2,7 @@
 
 namespace Device
 {
-    LPS25HB_Async::LPS25HB_Async(Peripherals::I2CBase_IT& i2c_)
+    LPS25HB_Async::LPS25HB_Async(Peripherals::I2CInterface_IT& i2c_)
         : i2c(i2c_) {}
 
     void LPS25HB_Async::OnRxComplete()

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "IGpioOutput.hpp"
+#include "Interfaces/IGpioOutput.hpp"
 
 extern "C"
 {
@@ -14,10 +14,6 @@ namespace Peripherals
         class GpioOutput : public IGpioOutput
         {
         private:
-            void Set_Impl();
-            void Clear_Impl();
-            void Toggle_Impl();
-            GpioOutputState GetState_Impl() const;
             GPIO_TypeDef& port;
             uint16_t pin;
 
@@ -31,10 +27,10 @@ namespace Peripherals
 
             GpioOutput(GPIO_TypeDef& port_, const uint16_t pin_);
 
-            void Set() override;
-            void Clear() override;
-            void Toggle() override;
-            GpioOutputState GetState() const override;
+            void Set() override final;
+            void Clear() override final;
+            void Toggle() override final;
+            GpioState GetState() const override final;
         };
     };
 };

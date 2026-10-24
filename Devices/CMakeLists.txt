@@ -19,3 +19,8 @@ configure_library(${target_name}
 )
 
 configure_embedded_target(${target_name})
+
+target_link_libraries(${target_name}
+    INTERFACE
+        I2CInterfaces
+)

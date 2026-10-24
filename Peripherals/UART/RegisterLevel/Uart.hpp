@@ -17,7 +17,7 @@
 
 #include <optional>
 
-#include "IUart.hpp"
+#include "Interfaces/IUart.hpp"
 #include "UartBase.hpp"
 #include "Utils/RingBuffer.hpp"
 
@@ -29,7 +29,7 @@ namespace Peripherals
 
         template< std::size_t bufferSize = 64>
         class Uart : public IUart
-            , public UartBase<USART_TypeDef, bufferSize>
+                   , public UartBase<USART_TypeDef, bufferSize>
         {
         protected:
             UartRingBuffer<bufferSize> rxBuffer{};

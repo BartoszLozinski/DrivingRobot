@@ -2,7 +2,7 @@
 
 namespace Device
 {
-    ICM20948_Async::ICM20948_Async(Peripherals::I2CBase_IT& i2c_)
+    ICM20948_Async::ICM20948_Async(Peripherals::I2CInterface_IT& i2c_)
         : i2c(i2c_) {}
 
     float ICM20948_Async::GetAccelerometerSensitivity() const

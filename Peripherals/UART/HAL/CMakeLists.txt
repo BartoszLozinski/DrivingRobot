@@ -4,8 +4,7 @@ set(${target_name}_src  UartIT.cpp
 )
 
 
-set(${target_name}_hpp  ../IUart.hpp
-                        ../LineParser.hpp
+set(${target_name}_hpp  ../LineParser.hpp
                         ../Utils/RingBuffer.hpp
                         Uart.hpp
                         UartIT.hpp
@@ -21,3 +20,7 @@ configure_embedded_target(${target_name}
 
 configure_HAL_target(${target_name}
 )
+
+target_link_libraries(${target_name}
+    INTERFACE
+        UartInterfaces)

@@ -10,6 +10,8 @@ concept UartConcept = requires(T& uart)
     { uart.Read() } -> std::same_as<std::optional<uint8_t>>;
 };
 
+//TODO separate frmo uart - depend only on the ring buffer
+
 namespace UcCommunication
 {
     template<UartConcept UartT, std::size_t BufferSize = 64>

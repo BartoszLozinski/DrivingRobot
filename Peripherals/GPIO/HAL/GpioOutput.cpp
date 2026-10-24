@@ -23,9 +23,9 @@ namespace Peripherals
             HAL_GPIO_TogglePin(&port, pin);
         }
 
-        GpioOutputState GpioOutput::GetState() const
+        GpioState GpioOutput::GetState() const
         {
-            return (HAL_GPIO_ReadPin(&port, pin) == GPIO_PIN_SET) ? GpioOutputState::Set : GpioOutputState::Reset;
+            return (HAL_GPIO_ReadPin(&port, pin) == GPIO_PIN_SET) ? GpioState::High : GpioState::Low;
         }
     };
 };

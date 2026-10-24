@@ -1,6 +1,6 @@
 #pragma once
 
-#include "I2CBase.hpp"
+#include "Interfaces/I2CInterface_IT.hpp"
 #include <array>
 #include <optional>
 #include <span>
@@ -14,9 +14,11 @@ namespace Peripherals
 {
     namespace HAL
     {
-        class I2C_IT : public I2CBase_IT
+        class I2C_IT : public I2CInterface_IT
         {
         private:
+            static constexpr uint8_t addressOffset = 1; // STM32 HAL library uses 8-bit address, so we need to shift the 7-bit address by 1 to the left
+
             I2C_HandleTypeDef& i2cHandle;
             volatile I2CState state{  I2CState::Idle };
 

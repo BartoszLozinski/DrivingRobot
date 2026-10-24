@@ -1,6 +1,6 @@
 #pragma once
 #include "GpioBase.hpp"
-#include "IGpioOutput.hpp"
+#include "Interfaces/IGpioOutput.hpp"
 
 namespace Peripherals
 {
@@ -36,15 +36,15 @@ namespace Peripherals
             ~GpioOutput() = default;
 
             //Output data register ODR - reference manual 8.5.6
-            GpioOutputState GetState() const override { return port->ODR & PinMask<pin>() ? GpioOutputState::Set : GpioOutputState::Reset; }
-            void Set() override { port->BSRR |= (0b1 << pin); }
-            void Clear() override
+            GpioState GetState() const override final { return port->ODR & PinMask<pin>() ? GpioState::High : GpioState::Low; }
+            void Set() override final { port->BSRR |= (0b1 << pin); }
+            void Clear() override final
             {
                 static constexpr uint8_t bitShiftOffset = 16;
                 static constexpr uint8_t bitShift = bitShiftOffset + pin; //bit resets are 16-32
                 port->BSRR |= (0b1 << bitShift);
             }
-            void Toggle() override { port->ODR ^= (0b1 << pin); /*Bitwise XOR*/} //ODR has 16 bits
+            void Toggle() override final { port->ODR ^= (0b1 << pin); /*Bitwise XOR*/} //ODR has 16 bits
 
         };
     }

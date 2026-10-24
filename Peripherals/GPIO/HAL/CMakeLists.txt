@@ -5,8 +5,6 @@ set(${target_name}_src
 )
 
 set(${target_name}_hpp
-    ../IGpioOutput.hpp
-    ../IGpioInput.hpp
     GpioOutput.hpp
     GpioInput.hpp
 )
@@ -18,3 +16,8 @@ configure_library(${target_name}
 
 configure_embedded_target(${target_name})
 configure_HAL_target(${target_name})
+
+target_link_libraries(${target_name}
+    INTERFACE
+        GpioInterfaces
+)

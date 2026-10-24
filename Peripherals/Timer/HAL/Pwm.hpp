@@ -1,6 +1,6 @@
 #pragma once
 
-#include "TimerInterfaces/IPwm.hpp"
+#include "Interfaces/IPwm.hpp"
 
 extern "C" 
 {

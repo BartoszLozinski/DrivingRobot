@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Peripherals/Timer/TimerInterfaces/IPwm.hpp"
+#include "Peripherals/Timer/Interfaces/IPwm.hpp"
 
 // TODO - add unit tests
 // TODO - add class that parses uart commands

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ISpi.hpp"
+#include "Interfaces/ISpi.hpp"
 
 extern "C"
 {

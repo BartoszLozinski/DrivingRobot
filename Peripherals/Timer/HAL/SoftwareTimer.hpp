@@ -1,6 +1,6 @@
 #pragma once
 
-#include "TimerInterfaces/TimerBase.hpp"
+#include "Interfaces/TimerBase.hpp"
 #include <cstdint>
 
 namespace HAL

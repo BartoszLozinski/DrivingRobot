@@ -2,7 +2,7 @@
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
-#include "Peripherals/Timer/TimerInterfaces/IPwm.hpp"
+#include "Peripherals/Timer/Interfaces/IPwm.hpp"
 
 struct IPwmMock : public Peripherals::IPwm
 {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "IGpioInput.hpp"
+#include "Interfaces/IGpioInput.hpp"
 
 extern "C"
 {
