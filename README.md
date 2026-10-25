@@ -11,6 +11,11 @@ for a DIY drone as a next project.
 Project involves CubeMX generated code, wrapped in the C++20 classes and architecture
 as well as RegisterLevel C++ drivers for some peripherals (ie. UART, GPIO).
 
+# Current state:
+
+Project is a STM32 robot, with blueeotoh control and sensors support.
+PWM control is in the prototype stage, as motors haven't been added yet.
+
 2. Architecture
 
 DrivingRobot
@@ -48,18 +53,31 @@ BuildScript.sh is prepared to automatize ninja builds and cmake configuration fo
 while "Debug" is the default one. You can explicitly select build config
 passing "Debug" or "Release" keyword after script name (./BuildScript.sh <CONFIG>), i.e:
 
+# From the repository root:
+
+./BuildScript.sh Debug          - default option, explicit "Debug" argument can be ommited
 ./BuildScript.sh Release
 
 Flashing script takes the same arguments, with "Debug" as a defualt one as well.
 It uses openocd to flash program into the hardware
+
+# Flash selected build from the repository root:
+
+./Flash Debug
+./Flash Release
 
 4. how to connect to the hc-06 module:
 4.1 sudo rfcomm connect 0 <Address>
 4.2 ls -l /dev/rfcomm0 - check device
 4.3 in new terminal: screen /dev/rfcomm0 <BAUDRATE>
 
+Note that address should be selected from the documentation or available devices.
+HC-06 uses 9600 baudrate.
+
 in example:
 Bluetooth HC-06 connection on linux ubuntu: sudo rfcomm connect 0 <Address>
 on second terminal window run communication app
-if you're using venv: python3.12 -m venv .venv
-.venv/bin/python CommunicatinApp/CommunicatinApp.py
+if you're using venv:
+python3.12 -m venv .venv
+.venv/bin/python -m pip install keyboard
+sudo .venv/bin/python CommunicatinApp/CommunicatinApp.py   - keyboard requires sudo accesability
