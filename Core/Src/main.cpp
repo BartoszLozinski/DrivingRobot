@@ -136,10 +136,8 @@ int main()
                                                       , printAccelerometer } };
 
     // LPS25HB test
-    uart1.ConfigureInterruptsPriority(IRQn_Type::USART1_IRQn, 1);
-    uart1.Init(uart1Tx, uart1Rx, 9600);
-    uart2.ConfigureInterruptsPriority(IRQn_Type::USART2_IRQn, 2);
-    uart2.Init(uart2Tx, uart2Rx, 115200);
+    uart1.Init(uart1Tx, uart1Rx, 9600, IRQn_Type::USART1_IRQn, 1);
+    uart2.Init(uart2Tx, uart2Rx, 115200, IRQn_Type::USART2_IRQn, 2);
     ld2.Init();
 
     tim3_ch1_pa6_left.Start();

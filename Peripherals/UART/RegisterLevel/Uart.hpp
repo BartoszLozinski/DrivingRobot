@@ -25,7 +25,7 @@ namespace Peripherals
 {
     namespace RegisterLevel
     {
-        template< std::size_t bufferSize = 64>
+        template<std::size_t bufferSize = 64>
         class Uart : public IUart_IT
                    , public UartBase<USART_TypeDef, bufferSize>
         {
@@ -86,9 +86,10 @@ namespace Peripherals
 
             /*Get appropriate Tx and Rx pins from datasheet*/
             template<typename TxPin, typename RxPin>
-            void Init(TxPin& txPin, RxPin& rxPin, const uint32_t baudRate = 115200)
+            void Init(TxPin& txPin, RxPin& rxPin, const uint32_t baudRate, const IRQn_Type selectedExti, const uint8_t priority)
             {
-                this->UartBase<USART_TypeDef, bufferSize>::Init(txPin, rxPin, baudRate);
+                this->ConfigureInterruptsPriority(selectedExti, priority);
+                this->InitBase(txPin, rxPin, baudRate);
                 EnableRxInterrupt();
             }
 

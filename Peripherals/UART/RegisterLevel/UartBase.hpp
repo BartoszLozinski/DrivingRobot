@@ -49,6 +49,8 @@ namespace Peripherals
         {
         protected:
             volatile Usart* const usart = nullptr;
+            volatile bool messageReady_ = false;
+            std::array<char, bufferSize>::iterator index_;
 
             void EnableClock()
             {
@@ -93,20 +95,16 @@ namespace Peripherals
                 usart->CR1 |= USART_CR1_RE; //receiver enabled - 0 disable, 1- enabled
             }
 
-            volatile bool messageReady_ = false;
-            std::array<char, bufferSize>::iterator index_;
-
-
-        public:
-            UartBase(const UartBase& source) = delete;
-            UartBase(UartBase&& source) = delete;
-            UartBase& operator=(const UartBase& source) = delete;
-            UartBase& operator=(UartBase&& source) = delete;
-            UartBase(Usart* const usart_) : usart(usart_) {};
+            void ConfigureInterruptsPriority(const IRQn_Type selectedExti, const uint8_t priority)
+            {
+                NVIC_SetPriority(selectedExti, priority); //set priority (for exti ,  priotity = 1
+                NVIC_EnableIRQ(selectedExti);//enable interrupt
+                //enum from stm32l476xx.h (CMSIS file) - Interrupt number definition
+            };
 
             /*Get appropriate Tx and Rx pins from datasheet*/
             template<typename TxPin, typename RxPin>
-            void Init(TxPin& txPin, RxPin& rxPin, const uint32_t baudRate = 115200)
+            void InitBase(TxPin& txPin, RxPin& rxPin, const uint32_t baudRate = 115200)
             {
                 txPin.Init();
                 rxPin.Init();
@@ -114,12 +112,12 @@ namespace Peripherals
                 UartConfig(baudRate);
             }
 
-            void ConfigureInterruptsPriority(const IRQn_Type selectedExti, const uint8_t priority)
-            {
-                NVIC_SetPriority(selectedExti, priority); //set priority (for exti ,  priotity = 1
-                NVIC_EnableIRQ(selectedExti);//enable interrupt
-                //enum from stm32l476xx.h (CMSIS file) - Interrupt number definition
-            };
+        public:
+            UartBase(const UartBase& source) = delete;
+            UartBase(UartBase&& source) = delete;
+            UartBase& operator=(const UartBase& source) = delete;
+            UartBase& operator=(UartBase&& source) = delete;
+            UartBase(Usart* const usart_) : usart(usart_) {};
         };
     }
 }
