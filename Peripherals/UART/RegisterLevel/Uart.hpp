@@ -17,7 +17,7 @@
 
 #include <optional>
 
-#include "Interfaces/IUart.hpp"
+#include "Interfaces/IUart_IT.hpp"
 #include "UartBase.hpp"
 #include "CommunicationUtils/RingBuffer/RingBuffer.hpp"
 
@@ -26,7 +26,7 @@ namespace Peripherals
     namespace RegisterLevel
     {
         template< std::size_t bufferSize = 64>
-        class Uart : public IUart
+        class Uart : public IUart_IT
                    , public UartBase<USART_TypeDef, bufferSize>
         {
         protected:
@@ -44,6 +44,37 @@ namespace Peripherals
             void EnableTxInterrupt()
             {
                 this->usart->CR1 |= USART_CR1_TXEIE; // Enable TX interrupt
+            }
+
+            void HandleTxInterrupt()
+            {
+                // ISR_TXEIE - transmit register empty
+                // TCIE - transmission comlpete
+                if ((this->usart->ISR & USART_ISR_TXE) && (this->usart->CR1 & USART_CR1_TXEIE))
+                {
+                    const auto byte = txBuffer.Pop();
+
+                    if (byte)
+                    {
+                        this->usart->TDR = byte.value();
+                    }
+                    else
+                    {
+                        this->usart->CR1 &= ~USART_CR1_TXEIE;
+                        txBusy = false;
+                    }
+                }
+            }
+
+            void HandleRxInterrupt()
+            {
+                if (this->usart->ISR & USART_ISR_RXNE)
+                {
+                    const auto byte = static_cast<uint8_t>(this->usart->RDR);
+                
+                    if (!rxBuffer.Push(byte))
+                        ++overflowCount;
+                }
             }
 
         public:
@@ -80,7 +111,7 @@ namespace Peripherals
                 ProcessTx();
             }
 
-            void ProcessTx()
+            void ProcessTx() override final
             {
                 if (txBusy)
                     return;
@@ -93,38 +124,7 @@ namespace Peripherals
                 }
             }
 
-            void HandleTxInterrupt()
-            {
-                // ISR_TXEIE - transmit register empty
-                // TCIE - transmission comlpete
-                if ((this->usart->ISR & USART_ISR_TXE) && (this->usart->CR1 & USART_CR1_TXEIE))
-                {
-                    const auto byte = txBuffer.Pop();
-
-                    if (byte)
-                    {
-                        this->usart->TDR = byte.value();
-                    }
-                    else
-                    {
-                        this->usart->CR1 &= ~USART_CR1_TXEIE;
-                        txBusy = false;
-                    }
-                }
-            }
-
-            void HandleRxInterrupt()
-            {
-                if (this->usart->ISR & USART_ISR_RXNE)
-                {
-                    const auto byte = static_cast<uint8_t>(this->usart->RDR);
-                
-                    if (!rxBuffer.Push(byte))
-                        ++overflowCount;
-                }
-            }
-
-            void IRQHandler()
+            void IRQHandler() override final
             {
                 HandleRxInterrupt();        
                 HandleTxInterrupt();

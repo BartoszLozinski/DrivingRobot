@@ -2,6 +2,7 @@ set(target_name UartInterfaces)
 
 set(${target_name}_hpp
     IUart.hpp
+    IUart_IT.hpp
 )
 
 configure_library(${target_name}
