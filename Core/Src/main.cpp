@@ -45,7 +45,7 @@ int main()
     volatile uint32_t pressure = 0;
     WheelsController wheelsController{ tim3_ch1_pa6_left, tim3_ch2_pa7_right };
 
-    Task<RegisterLevel::SoftwareTimer> readLPS25HBSensorTask{ 500, [&]()
+    Task<RegisterLevel::STM32_L4::SoftwareTimer> readLPS25HBSensorTask{ 500, [&]()
     {
         if (lps25hbAsync.IsAwake())
         {
@@ -61,19 +61,19 @@ int main()
         }
     }};
 
-    Task<RegisterLevel::SoftwareTimer> printTemperaturePressureTask{ 2000, [&]()
+    Task<RegisterLevel::STM32_L4::SoftwareTimer> printTemperaturePressureTask{ 2000, [&]()
     {
         char messageBuffer[48];
         snprintf(messageBuffer, sizeof(messageBuffer), "Temp: %.2f C, Pressure: %lu hPa\r\n", temperature, pressure);
         uart2.Transmit(reinterpret_cast<const uint8_t*>(messageBuffer), strlen(messageBuffer));
     }};
 
-    Task<RegisterLevel::SoftwareTimer> ld2Task{ 150, [&]()
+    Task<RegisterLevel::STM32_L4::SoftwareTimer> ld2Task{ 150, [&]()
     {
         ld2.Toggle();
     }};
 
-    Task<RegisterLevel::SoftwareTimer> wheelsControllerTask{ 10, [&]()
+    Task<RegisterLevel::STM32_L4::SoftwareTimer> wheelsControllerTask{ 10, [&]()
     {
         // TODO:
         // add turning off option
@@ -95,7 +95,7 @@ int main()
     std::optional<AccelerometerGyroSample> accelerometerGyro = std::nullopt;
 
     bool initializationNotPrintedOrChanged = true;
-    Task<RegisterLevel::SoftwareTimer> readICM20948Accelerometer{ 50, [&]()
+    Task<RegisterLevel::STM32_L4::SoftwareTimer> readICM20948Accelerometer{ 50, [&]()
     {
         if (icm20948Async.IsReady())
         {
@@ -114,7 +114,7 @@ int main()
         }
     }};
 
-    Task<RegisterLevel::SoftwareTimer> printAccelerometer{ 500, [&]()
+    Task<RegisterLevel::STM32_L4::SoftwareTimer> printAccelerometer{ 500, [&]()
     {
         if (accelerometerGyro)
         {
@@ -128,7 +128,7 @@ int main()
         }
     }};
     
-    Scheduler<Task<RegisterLevel::SoftwareTimer>, 6> scheduler{ { readLPS25HBSensorTask
+    Scheduler<Task<RegisterLevel::STM32_L4::SoftwareTimer>, 6> scheduler{ { readLPS25HBSensorTask
                                                       , printTemperaturePressureTask
                                                       , ld2Task
                                                       , wheelsControllerTask

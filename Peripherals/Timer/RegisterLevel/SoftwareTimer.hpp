@@ -3,7 +3,7 @@
 #include "Interfaces/TimerBase.hpp"
 #include <cstdint>
 
-namespace RegisterLevel
+namespace RegisterLevel::STM32_L4
 {
     class SoftwareTimer : public TimerBase<SoftwareTimer>
     {

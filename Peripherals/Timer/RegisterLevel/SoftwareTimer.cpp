@@ -2,7 +2,7 @@
 
 #include "../../Core/Inc/stm32l4xx_it.h"
 
-namespace RegisterLevel
+namespace RegisterLevel::STM32_L4
 {
     SoftwareTimer::SoftwareTimer(const uint32_t delay_)
         : TimerBase<SoftwareTimer>(delay_)
