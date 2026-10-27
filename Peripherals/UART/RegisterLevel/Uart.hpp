@@ -21,10 +21,9 @@
 #include "UartBase.hpp"
 #include "CommunicationUtils/RingBuffer/RingBuffer.hpp"
 
-namespace Peripherals
+namespace Peripherals::RegisterLevel::STM32_L476
 {
-    namespace RegisterLevel
-    {
+
         template<std::size_t bufferSize = 64>
         class Uart : public IUart_IT
                    , public UartBase<USART_TypeDef, bufferSize>
@@ -131,5 +130,4 @@ namespace Peripherals
                 HandleTxInterrupt();
             }
         };
-    }
 }

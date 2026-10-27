@@ -16,6 +16,7 @@
 // try once more
 
 #include "Config/Config.hpp"
+//TODO can i get rid of 4_76 specific code? maybe it could be move to external invokes
 #include <stm32l476xx.h>
 #include <array>
 #include <concepts>
@@ -39,10 +40,8 @@ concept USARTx = requires (T uart)
 	{ uart.TDR }        -> std::convertible_to<volatile uint32_t&>;		/*!< USART Transmit Data register,             Address offset: 0x28 */
 };
 
-namespace Peripherals
+namespace Peripherals::RegisterLevel::STM32_L476
 {
-    namespace RegisterLevel
-    {
         /*Rx and Tx pins needs to be configured/initialized before Uart*/
         template<USARTx Usart, std::size_t bufferSize = 64>
         class UartBase
@@ -119,5 +118,4 @@ namespace Peripherals
             UartBase& operator=(UartBase&& source) = delete;
             UartBase(Usart* const usart_) : usart(usart_) {};
         };
-    }
 }
