@@ -2,7 +2,7 @@
 
 namespace Peripherals
 {
-    namespace RegisterLevel
+    namespace RegisterLevel::STM32_L4
     {
         namespace Gpio
         {

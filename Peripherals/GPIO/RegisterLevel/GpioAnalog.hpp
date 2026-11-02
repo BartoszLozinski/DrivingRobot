@@ -3,7 +3,7 @@
 
 namespace Peripherals
 {
-    namespace RegisterLevel
+    namespace RegisterLevel::STM32_L4
     {
         template<uint8_t pin_>
         class GpioAnalog : public GpioBase<GPIO_TypeDef, pin_>

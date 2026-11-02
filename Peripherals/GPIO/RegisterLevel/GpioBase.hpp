@@ -8,7 +8,7 @@
 
 namespace Peripherals
 {
-    namespace RegisterLevel
+    namespace RegisterLevel::STM32_L4
     {
         static constexpr std::array<uint32_t, 16> GPIO_ASCR_ASC = {
             GPIO_ASCR_ASC0, GPIO_ASCR_ASC1, GPIO_ASCR_ASC2, GPIO_ASCR_ASC3, GPIO_ASCR_ASC4, GPIO_ASCR_ASC5, GPIO_ASCR_ASC6, GPIO_ASCR_ASC7,
