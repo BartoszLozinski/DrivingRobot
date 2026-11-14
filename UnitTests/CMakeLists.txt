@@ -63,6 +63,7 @@ target_link_libraries(${PROJECT_NAME}
         TimerInterfaces
         I2CInterfaces
         SpiInterfaces
+        GpioInterfaces
 )
 
 target_compile_options(${PROJECT_NAME}

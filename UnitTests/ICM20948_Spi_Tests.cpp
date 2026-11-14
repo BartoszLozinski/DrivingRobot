@@ -57,3 +57,77 @@ TEST(ICM20948Spi, InitHandlesTxCompletionBeforeTransmitReturns)
     icm20948.Init(Device::ICM20948::AccelerometerSensitivity::g4,
                   Device::ICM20948::GyroscopeSensitivity::dps500);
 }
+
+TEST(ICM20948SpiRead, ReadAccelerometerGyroDecodesSignedValues)
+{
+    SpiMock spi;
+    GpioOutputMock chipSelect;
+    Device::ICM20948_Async_Spi icm20948{ spi, chipSelect };
+
+    std::span<uint8_t> pendingBuffer;
+    const std::array<uint8_t, 12> raw
+    {
+        0x40, 0x00,  // accel X:  16384 ->  1 g
+        0xE0, 0x00,  // accel Y:  -8192 -> -0.5 g
+        0x00, 0x00,  // accel Z:     0
+        0x00, 0x83,  // gyro X:    131 ->  1 dps
+        0xFF, 0x7D,  // gyro Y:   -131 -> -1 dps
+        0x00, 0x00   // gyro Z:      0
+    };
+
+    //static constexpr uint8_t READ_BIT_MASK = 0x80;
+    //static constexpr uint8_t ACCEL_XOUT_H = 0x2D;
+
+    // Trigger the read command
+
+    // uint8_t readCommand = static_cast<uint8_t>(ACCEL_XOUT_H) | READ_BIT_MASK;
+
+    EXPECT_CALL(spi, Transmit(/*std::span<uint8_t>(&readCommand, sizeof(readCommand))*/ testing::_ ))
+        .WillOnce([&](std::span<uint8_t> data) -> Peripherals::SpiResult
+            {
+                EXPECT_EQ(data.size(), 1u);
+                EXPECT_EQ(data[0], 0xADu);
+                icm20948.OnTxComplete();
+                return Peripherals::SpiResult::Success;
+            }
+        );
+
+    EXPECT_CALL(chipSelect, Clear()).Times(1);
+    EXPECT_CALL(spi, OnTxComplete()).Times(1);
+    
+    EXPECT_FALSE(icm20948.ReadAccelerometerGyro().has_value());
+
+    // Read the sample
+
+    EXPECT_CALL(spi, Receive(testing::_))
+        .WillOnce([&](std::span<uint8_t> destination)
+            {
+                EXPECT_EQ(destination.size(), 12u);
+                pendingBuffer = destination;
+                icm20948.OnRxComplete();
+                return Peripherals::SpiResult::Success;
+            }
+        );
+
+
+    EXPECT_CALL(spi, OnRxComplete())
+        .WillOnce([&]()
+            {
+                std::ranges::copy(raw, pendingBuffer.begin());
+            }
+        );
+
+    EXPECT_CALL(chipSelect, Set()).Times(1);
+    ASSERT_FALSE(icm20948.ReadAccelerometerGyro().has_value());
+
+    //Read sample from buffer
+
+    EXPECT_CALL(spi, NotifyDataIsRead()).Times(1);
+    const auto sample = icm20948.ReadAccelerometerGyro();
+
+    ASSERT_TRUE(sample.has_value());
+    ASSERT_FLOAT_EQ(sample->accelX, 1.0f);
+    ASSERT_FLOAT_EQ(sample->accelY, -0.5f);
+    ASSERT_FLOAT_EQ(sample->gyroX, 1.0f);
+    ASSERT_FLOAT_EQ(sample->gyroY, -1.0f);
+}
