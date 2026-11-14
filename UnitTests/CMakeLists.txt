@@ -32,7 +32,6 @@ set(${PROJECT_NAME}_hpp     Mocks/I2CMock.hpp
 cmake_path(GET CMAKE_CURRENT_SOURCE_DIR PARENT_PATH parent_dir)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../Devices ${CMAKE_CURRENT_BINARY_DIR}/Devices)
-#add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../Devices/ICM20948 ${CMAKE_CURRENT_BINARY_DIR}/ICM20948)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../WheelsController ${CMAKE_CURRENT_BINARY_DIR}/WheelsController)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../CommunicationUtils/LineParser ${CMAKE_CURRENT_BINARY_DIR}/LineParser)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../CommunicationUtils/RingBuffer ${CMAKE_CURRENT_BINARY_DIR}/RingBuffer)
@@ -56,9 +55,9 @@ target_link_libraries(${PROJECT_NAME}
     PRIVATE
         ${GTEST_LIBRARIES}
         ${GMOCK_LIBRARIES}
-        Devices
         WheelsController
         ICM20948
+        LPS25HB
     INTERFACE
         LineParser
         RingBuffer

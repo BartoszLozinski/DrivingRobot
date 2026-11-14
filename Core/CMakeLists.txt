@@ -29,8 +29,8 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
         Timer_RegisterLevel
         # UART_HAL
         UART_RegisterLevel
-        Devices
         ICM20948
+        LPS25HB
         Scheduler
         WheelsController
 )

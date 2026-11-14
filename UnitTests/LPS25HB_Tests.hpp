@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Devices/LPS25HB.hpp"
-#include "Devices/LPS25HB_Async.hpp"
+#include "Devices/LPS25HB/LPS25HB.hpp"
+#include "Devices/LPS25HB/LPS25HB_Async.hpp"
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include "Mocks/I2CMock.hpp"

@@ -9,7 +9,7 @@
 #include "CommunicationUtils/LineParser/LineParser.hpp"
 #include "Peripherals/Timer/HAL/Pwm.hpp"
 
-#include "Devices/LPS25HB_Async.hpp"
+#include "Devices/LPS25HB/LPS25HB_Async.hpp"
 #include "Devices/ICM20948/ICM20948_Async_Spi.hpp"
 
 #include "../Inc/peripheralsDefinition.h"
