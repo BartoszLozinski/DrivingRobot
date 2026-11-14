@@ -12,15 +12,6 @@ namespace Peripherals
         Error,        
     };
 
-    enum class I2CState
-    {
-        Idle,
-        RxBusy,
-        TxBusy,
-        RxDone,
-        Error
-    };
-
     class I2CInterface
     {
     public:

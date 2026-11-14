@@ -3,6 +3,15 @@
 
 namespace Peripherals
 {
+    enum class I2CState
+    {
+        Idle,
+        RxBusy,
+        TxBusy,
+        RxDone,
+        Error
+    };
+
     class I2CInterface_IT : public I2CInterface
     {
     public:

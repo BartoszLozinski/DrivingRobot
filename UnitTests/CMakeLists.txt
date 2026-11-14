@@ -13,6 +13,7 @@ set(GMOCK_LIBRARIES     /usr/lib/libgmock.a
 
 set(${PROJECT_NAME}_src     mainTests.cpp
                             ICM20948_Tests.cpp
+                            ICM20948_Spi_Tests.cpp
                             LineParser_Tests.cpp
                             LPS25HB_Tests.cpp
                             RingBuffer_Tests.cpp
@@ -36,7 +37,8 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../CommunicationUtils/LineParser ${
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../CommunicationUtils/RingBuffer ${CMAKE_CURRENT_BINARY_DIR}/RingBuffer)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../Peripherals/Timer/Interfaces ${CMAKE_CURRENT_BINARY_DIR}/TimerInterfaces)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../Peripherals/I2C/Interfaces ${CMAKE_CURRENT_BINARY_DIR}/I2CInterfaces)
-
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../Peripherals/SPI/Interfaces ${CMAKE_CURRENT_BINARY_DIR}/SpiInterfaces)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../Peripherals/GPIO/Interfaces ${CMAKE_CURRENT_BINARY_DIR}/GpioInterfaces)
 
 add_executable(${PROJECT_NAME})
 
@@ -60,6 +62,7 @@ target_link_libraries(${PROJECT_NAME}
         RingBuffer
         TimerInterfaces
         I2CInterfaces
+        SpiInterfaces
 )
 
 target_compile_options(${PROJECT_NAME}

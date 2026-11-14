@@ -7,12 +7,13 @@
 
 #include "Peripherals/Timer/RegisterLevel/SoftwareTimer.hpp"
 #include "Peripherals/I2C/HAL/I2C_IT.hpp"
+#include "Peripherals/SPI/HAL/Spi_IT.hpp"
 #include "CommunicationUtils/LineParser/LineParser.hpp"
 #include "Peripherals/Timer/HAL/Pwm.hpp"
 
 #include "Devices/LPS25HB_Async.hpp"
 #include "Devices/MCP23S08.hpp"
-#include "Devices/ICM20948_Async.hpp"
+#include "Devices/ICM20948_Async_Spi.hpp"
 
 #include "../Inc/peripheralsDefinition.h"
 
@@ -22,12 +23,12 @@
 #include "WheelsController/WheelsController.hpp"
 
 Peripherals::HAL::I2C_IT i2c1IT{ hi2c1 };
-Peripherals::HAL::I2C_IT i2c2IT{ hi2c2 };
+Peripherals::HAL::Spi_IT spi1IT{ hspi1 };
 Peripherals::HAL::Pwm tim3_ch1_pa6_left{ htim3, TIM_CHANNEL_1 }; //PA6
 Peripherals::HAL::Pwm tim3_ch2_pa7_right{ htim3, TIM_CHANNEL_2 }; //PA7
 
 Device::LPS25HB_Async lps25hbAsync{ i2c1IT };
-Device::ICM20948_Async icm20948Async{ i2c2IT };
+Device::ICM20948_Async_Spi icm20948Async{ spi1IT, spi1_cs };
 
 int main()
 {
@@ -38,8 +39,9 @@ int main()
     /* Initialize all configured peripherals */
 
     MX_I2C1_Init();
-    MX_I2C2_Init();
     MX_TIM3_Init();
+    MX_SPI1_Init();
+    
     
     volatile float temperature = 0.0f;
     volatile uint32_t pressure = 0;
@@ -66,11 +68,6 @@ int main()
         char messageBuffer[48];
         snprintf(messageBuffer, sizeof(messageBuffer), "Temp: %.2f C, Pressure: %lu hPa\r\n", temperature, pressure);
         uart2.Transmit(reinterpret_cast<const uint8_t*>(messageBuffer), strlen(messageBuffer));
-    }};
-
-    Task<RegisterLevel::STM32_L4::SoftwareTimer> ld2Task{ 150, [&]()
-    {
-        ld2.Toggle();
     }};
 
     Task<RegisterLevel::STM32_L4::SoftwareTimer> wheelsControllerTask{ 10, [&]()
@@ -128,9 +125,8 @@ int main()
         }
     }};
     
-    Scheduler<Task<RegisterLevel::STM32_L4::SoftwareTimer>, 6> scheduler{ { readLPS25HBSensorTask
+    Scheduler<Task<RegisterLevel::STM32_L4::SoftwareTimer>, 5> scheduler{ { readLPS25HBSensorTask
                                                       , printTemperaturePressureTask
-                                                      , ld2Task
                                                       , wheelsControllerTask
                                                       , readICM20948Accelerometer
                                                       , printAccelerometer } };
@@ -138,7 +134,8 @@ int main()
     // LPS25HB test
     uart1.Init(uart1Tx, uart1Rx, 9600, IRQn_Type::USART1_IRQn, 1);
     uart2.Init(uart2Tx, uart2Rx, 115200, IRQn_Type::USART2_IRQn, 2);
-    ld2.Init();
+    spi1_cs.Init();
+    spi1_cs.Set();
 
     tim3_ch1_pa6_left.Start();
     tim3_ch2_pa7_right.Start();
@@ -175,10 +172,12 @@ extern "C" void HAL_I2C_MemRxCpltCallback(I2C_HandleTypeDef *hi2c)
         lps25hbAsync.OnRxComplete();
     }
 
+    /*
     if (hi2c->Instance == I2C2)
     {
         icm20948Async.OnRxComplete();
     }
+    */
 }
 
 extern "C" void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *hi2c)
@@ -187,10 +186,12 @@ extern "C" void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *hi2c)
     {
         lps25hbAsync.OnTxComplete();
     }
+    /*
     if (hi2c->Instance == I2C2)
     {
         icm20948Async.OnTxComplete();
     }
+    */
 }
 
 extern "C" void HAL_I2C_MasterTxCpltCallback(I2C_HandleTypeDef *hi2c)
@@ -199,11 +200,13 @@ extern "C" void HAL_I2C_MasterTxCpltCallback(I2C_HandleTypeDef *hi2c)
     {
         lps25hbAsync.OnTxComplete();
     }
-
+    
+    /*
     if (hi2c->Instance == I2C2)
     {
         icm20948Async.OnTxComplete();
     }
+    */
 }
 
 extern "C" void HAL_I2C_ErrorCallback(I2C_HandleTypeDef *hi2c)
@@ -214,10 +217,30 @@ extern "C" void HAL_I2C_ErrorCallback(I2C_HandleTypeDef *hi2c)
         uart2.Transmit(i2c1ErrorMsg, sizeof(i2c1ErrorMsg));
     }
 
+    /*
     if (hi2c->Instance == I2C2)
     {
         static constexpr uint8_t i2c2ErrorMsg[] = "I2C2 Error\r\n";
         uart2.Transmit(i2c2ErrorMsg, sizeof(i2c2ErrorMsg));
+    }
+    */
+}
+
+
+extern "C" void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi)
+{
+    if (hspi->Instance == SPI1)
+    {
+        icm20948Async.OnTxComplete();
+    }
+}
+
+
+extern "C" void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi)
+{
+    if (hspi->Instance == SPI1)
+    {
+        icm20948Async.OnRxComplete();
     }
 }
 

@@ -1,9 +1,11 @@
 set(target_name SPI_HAL)
 
 set(${target_name}_src  Spi.cpp
+                        Spi_IT.cpp
 )
 
 set(${target_name}_hpp  Spi.hpp
+                        Spi_IT.hpp
 )
 
 configure_library(${target_name}

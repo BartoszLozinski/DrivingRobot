@@ -2,6 +2,7 @@ set(target_name SpiInterfaces)
 
 set(${target_name}_hpp
     ISpi.hpp
+    ISpi_IT.hpp
 )
 
 configure_library(${target_name}
