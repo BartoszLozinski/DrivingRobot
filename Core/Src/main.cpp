@@ -1,7 +1,5 @@
 #include <stdio.h>
 #include <cstring>
-#include <string_view>
-#include <array>
 
 #include "stm32CubeMXGenerated.h"
 
@@ -41,7 +39,6 @@ int main()
     MX_I2C1_Init();
     MX_TIM3_Init();
     MX_SPI1_Init();
-    
     
     volatile float temperature = 0.0f;
     volatile uint32_t pressure = 0;
