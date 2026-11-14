@@ -4,7 +4,7 @@
 #include <gmock/gmock.h>
 #include "Mocks/I2CMock.hpp"
 
-#include "Devices/ICM20948_Async.hpp"
+#include "Devices/ICM20948/ICM20948_Async.hpp"
 
 class ICM20948Fixture : public ::testing::Test
 {

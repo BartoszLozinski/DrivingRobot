@@ -1,8 +1,8 @@
 #pragma once
 
 #include "ICM20948Base.hpp"
-#include "Peripherals/SPI/Interfaces/ISpi_IT.hpp"
-#include "Peripherals/GPIO/Interfaces/IGpioOutput.hpp"
+#include "../Peripherals/SPI/Interfaces/ISpi_IT.hpp"
+#include "../Peripherals/GPIO/Interfaces/IGpioOutput.hpp"
 #include "type_traits"
 #include <optional>
 

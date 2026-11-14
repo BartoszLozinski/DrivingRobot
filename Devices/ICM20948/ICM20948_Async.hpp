@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ICM20948Base.hpp"
-#include "Peripherals/I2C/Interfaces/I2CInterface_IT.hpp"
+#include "../Peripherals/I2C/Interfaces/I2CInterface_IT.hpp"
 #include "type_traits"
 #include <optional>
 

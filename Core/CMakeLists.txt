@@ -30,6 +30,7 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
         # UART_HAL
         UART_RegisterLevel
         Devices
+        ICM20948
         Scheduler
         WheelsController
 )

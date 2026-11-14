@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#include "Devices/ICM20948_Async_Spi.hpp"
+#include "Devices/ICM20948/ICM20948_Async_Spi.hpp"
 
 namespace
 {
