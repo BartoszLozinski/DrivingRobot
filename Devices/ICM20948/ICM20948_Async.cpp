@@ -52,24 +52,7 @@ namespace Device
     void ICM20948_Async::OnRxComplete()
     {
         i2c.OnRxComplete();
-
-        switch (state)
-        {
-        using enum State;
-        
-        case SampleReading:
-            state = SampleReadyToRead;
-            break;
-        case AccelConfigReading:
-            state = AccelConfigReadyToRead;
-            break;
-        case GyroConfig1Reading:
-            state = GyroConfig1ReadyToRead;
-            break;
-        default:  
-            state = RegisterReadyToRead;
-            break;
-        }
+        OnRxCompleteBase();
     }
 
     void ICM20948_Async::OnTxComplete()

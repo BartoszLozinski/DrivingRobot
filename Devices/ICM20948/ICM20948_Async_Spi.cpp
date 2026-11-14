@@ -64,32 +64,12 @@ namespace Device
             break;
         };
     }
-    
+
     void ICM20948_Async_Spi::OnRxComplete()
     {
         spi.OnRxComplete();
         chipSelect.Set();
-
-        switch (state)
-        {
-        using enum State;
-        case SampleReading:
-            state = SampleReadyToRead;
-            break;
-        case AccelConfigReading:
-            state = AccelConfigReadyToRead;
-            break;
-        case GyroConfig1Reading:
-            state = GyroConfig1ReadyToRead;
-            break;
-        case ReadingRegsiterScheduled:
-        case TransferScheduled:
-            state = RegisterReadyToRead;
-            break;
-        default:
-            state = RegisterReadyToRead;
-            break;
-        }
+        OnRxCompleteBase();
     }
 
     void ICM20948_Async_Spi::OnTxComplete()
@@ -99,18 +79,6 @@ namespace Device
         switch (state)
         {
         using enum State;
-        case SendReadCommand:
-            state = SendReadCommandDone;
-            break;
-        case SendCommandAccelConfigReading:
-            state = ReadAccelConfig;
-            break;
-        case SendCommandGyroConfig1Reading:
-            state = ReadGyroConfig1;
-            break;
-        case SendCommandReadAccelSample:
-            state = ReadSample;
-            break;
         case PreparingToWakeUp:
             chipSelect.Set();
             state = ReadyToWakeUp;
@@ -134,6 +102,18 @@ namespace Device
         case SetGyroSensitivity:
             chipSelect.Set();
             state = GyroSensitivityUpdated;
+            break;
+        case SendReadCommand:
+            state = SendReadCommandDone;
+            break;
+        case SendCommandAccelConfigReading:
+            state = ReadAccelConfig;
+            break;
+        case SendCommandGyroConfig1Reading:
+            state = ReadGyroConfig1;
+            break;
+        case SendCommandReadAccelSample:
+            state = ReadSample;
             break;
         default:
             break;

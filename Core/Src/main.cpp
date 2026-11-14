@@ -27,6 +27,9 @@ Peripherals::HAL::Pwm tim3_ch2_pa7_right{ htim3, TIM_CHANNEL_2 }; //PA7
 Device::LPS25HB_Async lps25hbAsync{ i2c1IT };
 Device::ICM20948_Async_Spi icm20948Async{ spi1IT, spi1_cs };
 
+//TODO add wheels motors and its control
+
+
 int main()
 {
     /* MCU Configuration--------------------------------------------------------*/

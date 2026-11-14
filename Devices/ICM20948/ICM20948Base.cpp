@@ -89,6 +89,28 @@ namespace Device
         isReady = true;
     }
 
+    void ICM20948Base::OnRxCompleteBase()
+    {
+        switch (state)
+        {
+        using enum State;
+        case SampleReading:
+            state = SampleReadyToRead;
+            break;
+        case AccelConfigReading:
+            state = AccelConfigReadyToRead;
+            break;
+        case GyroConfig1Reading:
+            state = GyroConfig1ReadyToRead;
+            break;
+        case ReadingRegsiterScheduled:
+        case TransferScheduled:
+        default:
+            state = RegisterReadyToRead;
+            break;
+        }
+    }
+
     void ICM20948Base::WakeUpBase()
     {
         static constexpr uint8_t defaultPwrMgmt1Reg = 0x41; //default value after reset, device is in sleep mode (bit 7 = 1), auto selects best available clock source (bit 2:0 = 1-5)

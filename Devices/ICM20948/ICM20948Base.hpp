@@ -182,6 +182,7 @@ namespace Device
         void InitGyroSensitivityUpdated();
         void InitSettingRegBankToThePreviousValueDone();
         void WakeUpBase();
+        void OnRxCompleteBase();
 
     public:
         virtual ~ICM20948Base() = default;

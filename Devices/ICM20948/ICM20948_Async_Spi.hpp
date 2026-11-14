@@ -6,7 +6,6 @@
 #include "type_traits"
 #include <optional>
 
-//TODO make common base for I2C and SPI
 //TODO select different pin for SCK instead of PA5, as it lights LD@ by defualt wiht every tick
 
 namespace Device
