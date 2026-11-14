@@ -5,16 +5,15 @@ set(${target_name}_src  LPS25HBBase.cpp
                         LPS25HB_Async.cpp
                         ICM20948Base.cpp
                         ICM20948_Async.cpp
-                        ICM20948_Async_Spi.cpp)
+                        ICM20948_Async_Spi.cpp
+)
 
 set(${target_name}_hpp  LPS25HBBase.hpp
                         LPS25HB.hpp
                         LPS25HB_Async.hpp
-                        ICM20948Base.hpp
                         ICM20948_Async.hpp
                         ICM20948_Async_Spi.hpp
-                        MCP23S08.hpp
-                        Measurement.hpp)
+)
 
 
 configure_library(${target_name}

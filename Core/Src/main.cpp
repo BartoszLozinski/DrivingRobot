@@ -12,7 +12,6 @@
 #include "Peripherals/Timer/HAL/Pwm.hpp"
 
 #include "Devices/LPS25HB_Async.hpp"
-#include "Devices/MCP23S08.hpp"
 #include "Devices/ICM20948_Async_Spi.hpp"
 
 #include "../Inc/peripheralsDefinition.h"
