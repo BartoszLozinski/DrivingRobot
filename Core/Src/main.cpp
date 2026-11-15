@@ -28,6 +28,7 @@ Device::LPS25HB_Async lps25hbAsync{ i2c1IT };
 Device::ICM20948_Async_Spi icm20948Async{ spi1IT, spi1_cs };
 
 //TODO add wheels motors and its control
+//TODO add gpios for second wheel, and write documentation with electrical scheme
 
 
 int main()
@@ -139,6 +140,8 @@ int main()
     tb6612fngStandby.Init();
     tb6612fngAIn1.Init();
     tb6612fngAIn2.Init();
+    tb6612fngBIn1.Init();
+    tb6612fngBIn2.Init();
 
     tim3_ch1_pa6_left.Start();
     tim3_ch2_pa7_right.Start();
@@ -146,6 +149,8 @@ int main()
     tb6612fngStandby.Set();
     tb6612fngAIn1.Set();
     tb6612fngAIn2.Clear();
+    tb6612fngBIn1.Set();
+    tb6612fngBIn1.Clear();
 
     while (true)
     {

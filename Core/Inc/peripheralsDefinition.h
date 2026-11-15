@@ -15,3 +15,5 @@ Peripherals::RegisterLevel::STM32_L476::Uart<128> uart2{ USART2 };
 Peripherals::RegisterLevel::STM32_L4::GpioOutput<0> tb6612fngStandby{ GPIOB };
 Peripherals::RegisterLevel::STM32_L4::GpioOutput<0> tb6612fngAIn1{ GPIOC };
 Peripherals::RegisterLevel::STM32_L4::GpioOutput<1> tb6612fngAIn2{ GPIOC };
+Peripherals::RegisterLevel::STM32_L4::GpioOutput<2> tb6612fngBIn1{ GPIOC };
+Peripherals::RegisterLevel::STM32_L4::GpioOutput<3> tb6612fngBIn2{ GPIOC };
