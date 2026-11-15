@@ -5,8 +5,6 @@
 #include "type_traits"
 #include <optional>
 
-// TODO add documentation
-
 namespace Device
 {
     class ICM20948_Async : public ICM20948Base

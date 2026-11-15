@@ -16,7 +16,6 @@
 // try once more
 
 #include "Config/Config.hpp"
-//TODO can i get rid of 4_76 specific code? maybe it could be move to external invokes
 #include <stm32l476xx.h>
 #include <array>
 #include <concepts>

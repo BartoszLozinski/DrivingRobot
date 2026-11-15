@@ -6,8 +6,6 @@
 #include "type_traits"
 #include <optional>
 
-//TODO select different pin for SCK instead of PA5, as it lights LD@ by defualt wiht every tick
-
 namespace Device
 {
     class ICM20948_Async_Spi : public ICM20948Base
