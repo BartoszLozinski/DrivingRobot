@@ -136,8 +136,16 @@ int main()
     spi1_cs.Init();
     spi1_cs.Set();
 
+    tb6612fngStandby.Init();
+    tb6612fngAIn1.Init();
+    tb6612fngAIn2.Init();
+
     tim3_ch1_pa6_left.Start();
     tim3_ch2_pa7_right.Start();
+
+    tb6612fngStandby.Set();
+    tb6612fngAIn1.Set();
+    tb6612fngAIn2.Clear();
 
     while (true)
     {
