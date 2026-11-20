@@ -2,21 +2,16 @@
 #include <cstring>
 
 #include "stm32CubeMXGenerated.h"
-
 #include "Peripherals/Timer/RegisterLevel/SoftwareTimer.hpp"
 #include "Peripherals/I2C/HAL/I2C_IT.hpp"
 #include "Peripherals/SPI/HAL/Spi_IT.hpp"
 #include "CommunicationUtils/LineParser/LineParser.hpp"
 #include "Peripherals/Timer/HAL/Pwm.hpp"
-
 #include "Devices/LPS25HB/LPS25HB_Async.hpp"
 #include "Devices/ICM20948/ICM20948_Async_Spi.hpp"
-
 #include "../Inc/peripheralsDefinition.h"
-
 #include "Scheduler/Task.hpp"
 #include "Scheduler/Scheduler.hpp"
-
 #include "WheelsController/WheelsController.hpp"
 
 Peripherals::HAL::I2C_IT i2c1IT{ hi2c1 };
@@ -69,14 +64,6 @@ int main()
 
     Task<RegisterLevel::STM32_L4::SoftwareTimer> wheelsControllerTask{ 10, [&]()
     {
-        // TODO:
-        // add turning off option
-        // and minimal pulse while turned on (simulation of not dropping too fast)
-        // TODO add simple simulator for wheels control (something reading angular velocity of wheels (percentage))
-        // and plotting wheels position of both
-        // calculate arcs etc
-
-        // communication app needs to be used, so keyboard press/release will be recognized
         if (const auto readValue = uart1.Read())
         {
             wheelsController.ParseThrottleControlOption(readValue.value());
@@ -128,7 +115,7 @@ int main()
                                                       , readICM20948Accelerometer
                                                       , printAccelerometer } };
 
-    // LPS25HB test
+
     uart1.Init(uart1Tx, uart1Rx, 9600, IRQn_Type::USART1_IRQn, 1);
     uart2.Init(uart2Tx, uart2Rx, 115200, IRQn_Type::USART2_IRQn, 2);
     spi1_cs.Init();
@@ -151,7 +138,7 @@ int main()
 
     while (true)
     {
-        // UART 1 Test - Bluetooth HC-06
+        // UART 1 - Bluetooth HC-06
         // connection at linux
         // sudo rfcomm connect 0 <Address>
         // on second terminal window: screen /dev/rfcomm0 9600
@@ -180,13 +167,6 @@ extern "C" void HAL_I2C_MemRxCpltCallback(I2C_HandleTypeDef *hi2c)
     {
         lps25hbAsync.OnRxComplete();
     }
-
-    /*
-    if (hi2c->Instance == I2C2)
-    {
-        icm20948Async.OnRxComplete();
-    }
-    */
 }
 
 extern "C" void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *hi2c)
@@ -195,12 +175,6 @@ extern "C" void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *hi2c)
     {
         lps25hbAsync.OnTxComplete();
     }
-    /*
-    if (hi2c->Instance == I2C2)
-    {
-        icm20948Async.OnTxComplete();
-    }
-    */
 }
 
 extern "C" void HAL_I2C_MasterTxCpltCallback(I2C_HandleTypeDef *hi2c)
@@ -209,13 +183,6 @@ extern "C" void HAL_I2C_MasterTxCpltCallback(I2C_HandleTypeDef *hi2c)
     {
         lps25hbAsync.OnTxComplete();
     }
-    
-    /*
-    if (hi2c->Instance == I2C2)
-    {
-        icm20948Async.OnTxComplete();
-    }
-    */
 }
 
 extern "C" void HAL_I2C_ErrorCallback(I2C_HandleTypeDef *hi2c)
@@ -225,14 +192,6 @@ extern "C" void HAL_I2C_ErrorCallback(I2C_HandleTypeDef *hi2c)
         static constexpr uint8_t i2c1ErrorMsg[] = "I2C1 Error\r\n";
         uart2.Transmit(i2c1ErrorMsg, sizeof(i2c1ErrorMsg));
     }
-
-    /*
-    if (hi2c->Instance == I2C2)
-    {
-        static constexpr uint8_t i2c2ErrorMsg[] = "I2C2 Error\r\n";
-        uart2.Transmit(i2c2ErrorMsg, sizeof(i2c2ErrorMsg));
-    }
-    */
 }
 
 
