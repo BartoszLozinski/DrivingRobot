@@ -39,8 +39,9 @@ int main()
     MX_TIM3_Init();
     MX_SPI1_Init();
     
-    volatile float temperature = 0.0f;
-    volatile uint32_t pressure = 0;
+    float temperature = 0.0f;
+    uint32_t pressure = 0;
+    
     WheelsController wheelsController{ tim3_ch1_pa6_left, tim3_ch2_pa7_right };
 
     Task<RegisterLevel::STM32_L4::SoftwareTimer> readLPS25HBSensorTask{ 500, [&]()
@@ -143,10 +144,10 @@ int main()
     tim3_ch2_pa7_right.Start();
 
     tb6612fngStandby.Set();
-    tb6612fngAIn1.Set();
-    tb6612fngAIn2.Clear();
-    tb6612fngBIn1.Set();
+    tb6612fngAIn1.Clear();
+    tb6612fngAIn2.Set();
     tb6612fngBIn1.Clear();
+    tb6612fngBIn2.Set();
 
     while (true)
     {

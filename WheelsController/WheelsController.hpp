@@ -27,8 +27,8 @@ class WheelsController
 private:
     static constexpr uint8_t IDLE_PULSE_PERCENT = 0;
     static constexpr uint8_t PULSE_INCREASEMENT_PERCENT = 4;
-    static constexpr uint8_t STEERING_PULSE_DIFFERENCE_PERCENT = 20;
-    static constexpr uint8_t MAX_STRAIGHT_PERCENT_PULSE = 40;
+    static constexpr uint8_t STEERING_PULSE_DIFFERENCE_PERCENT = 60;
+    static constexpr uint8_t MAX_STRAIGHT_PERCENT_PULSE = 90;
 
     void ThrottleControl();
     void SteeringControl();
